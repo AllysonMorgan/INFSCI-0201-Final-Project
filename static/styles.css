@@ -110,3 +110,20 @@ body{
 .manager_link p a:hover{
     text-decoration:underline
 }
+
+.wrapper .managercheck{
+    display:flex;
+    justify-content:space-around;
+    font-size:15px;
+    margin:-10px 0 10px
+}
+
+.managercheck label input{
+    padding:5px;
+    background:#e8e8cf;
+    accent-color:#e8e8cf;
+
+}
+.managercheck label input:hover{
+    cursor:pointer
+}

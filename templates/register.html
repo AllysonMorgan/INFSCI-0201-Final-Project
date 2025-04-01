@@ -10,7 +10,7 @@
 <body>
     <div class="wrapper">
         <form action="">
-            <h1>Manager Login</h1>
+            <h1>Create Account</h1>
             <div class="input_box">
                 <input type="text" placeholder="Username" required>
                 <i class='bx bxs-user'></i>
@@ -19,12 +19,12 @@
                 <input type="password" placeholder="Password" required>
                 <i class='bx bxs-lock-alt' ></i>
             </div>
-            <button type="submit" class="button">Login</button>
-            <div class="register_link">
-                <p> Don't have an account? <a href="{{ url_for('register') }}">Register here!</a></p>
+            <div class="managercheck">
+                <label>Make this a manager account? <input type="checkbox"></label>
             </div>
-            <div class="manager_link">
-                <p> Not a manager? <a href="{{ url_for('userlogin') }}">Sign in here!</a></p>
+            <button type="submit" class="button" >Register</button>
+            <div class="register_link">
+                <p> Already have an account? <a href="{{ url_for('userlogin') }}">Sign in here!</a></p>
             </div>
         </form>
     </div>
