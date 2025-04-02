@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Garden - Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <h1>Event Garden</h1>
+            <div class="user-controls">
+                <span>Welcome, {{ session.username }}!</span>
+                {% if session.is_manager %}
+                <a href="{{ url_for('create_event') }}" class="button">Create Event</a>
+                {% endif %}
+                <a href="{{ url_for('logout') }}" class="button">Logout</a>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main>
+            <!-- Search and Filter -->
+            <section class="search-section">
+                <form class="search-form">
+                    <div class="search-box">
+                        <input type="text" placeholder="Search events...">
+                        <button type="submit"><i class='bx bx-search'></i></button>
+                    </div>
+                    <div class="filters">
+                        <select>
+                            <option>All Event Types</option>
+                            <option>Conference</option>
+                            <option>Workshop</option>
+                            <option>Meetup</option>
+                        </select>
+                        <input type="date" id="event-date">
+                    </div>
+                </form>
+            </section>
+
+            <!-- Events Grid -->
+            <section class="events-section">
+                <h2>Upcoming Events</h2>
+                <div class="events-grid">
+                    <!-- Sample Event 1 -->
+                    <div class="event-card">
+                        <div class="event-image" style="background-image: url('/static/event1.jpg');"></div>
+                        <div class="event-details">
+                            <h3>Tech Conference 2023</h3>
+                            <p><i class='bx bx-calendar'></i> October 15, 2023</p>
+                            <p><i class='bx bx-map'></i> Convention Center, Pittsburgh</p>
+                            <p class="event-description">Annual technology conference featuring keynote speakers and workshops.</p>
+                            <div class="event-actions">
+                                <a href="#" class="button">View Details</a>
+                                <span class="attendees">120 attending</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sample Event 2 -->
+                    <div class="event-card">
+                        <div class="event-image" style="background-image: url('/static/event2.jpg');"></div>
+                        <div class="event-details">
+                            <h3>Design Workshop</h3>
+                            <p><i class='bx bx-calendar'></i> November 2, 2023</p>
+                            <p><i class='bx bx-map'></i> Design Hub, Pittsburgh</p>
+                            <p class="event-description">Hands-on workshop for UX/UI designers of all skill levels.</p>
+                            <div class="event-actions">
+                                <a href="#" class="button">View Details</a>
+                                <span class="attendees">45 attending</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Manager Section (Only visible to managers) -->
+            {% if session.is_manager %}
+            <section class="manager-section">
+                <h2>Your Managed Events</h2>
+                <div class="events-grid">
+                    <!-- Sample Managed Event -->
+                    <div class="event-card manager-card">
+                        <div class="event-actions">
+                            <a href="#" class="button">Edit</a>
+                            <a href="#" class="button danger">Cancel</a>
+                        </div>
+                        <h3>Your Event Title</h3>
+                        <p>Manage this event and view attendees</p>
+                    </div>
+                </div>
+            </section>
+            {% endif %}
+        </main>
+
+        <!-- Footer -->
+        <footer>
+            <p>&copy; 2025 Event Garden. All rights reserved.</p>
+        </footer>
+    </div>
+</body>
+</html>
