@@ -32,11 +32,11 @@ class User(db.Model):
 @app.route('/')
 def home():
     if 'username' not in session:
-        return redirect(url_for('login'))
+        return redirect(url_for('userlogin'))
     return render_template('landing.html')
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
+@app.route('/userlogin', methods=['GET', 'POST'])
+def userlogin():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
@@ -109,7 +109,7 @@ def register():
 def logout():
     session.clear()
     flash('You have been logged out.', 'info')
-    return redirect(url_for('login'))
+    return redirect(url_for('userlogin'))
 
 # Initialize database and create test users
 def initialize_database():
