@@ -15,7 +15,7 @@
             <div class="user-controls">
                 <span>Welcome, {{ session.username }}!</span>
                 {% if session.is_manager %}
-                <a href="{{ url_for('create_event') }}" class="button">Create Event</a>
+                <a href="#" class="button">Create Event</a>
                 {% endif %}
                 <a href="{{ url_for('logout') }}" class="button">Logout</a>
             </div>
