@@ -1,0 +1,67 @@
+<!-- templates/manager_landing.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Garden - Manager Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <h1>Event Garden</h1>
+            <div class="user-controls">
+                <span>Welcome, {{ session.username }}!</span>
+                <a href="{{ url_for('logout') }}" class="button">Logout</a>
+            </div>
+        </header>
+
+        <!-- Main -->
+        <main>
+            <!-- Create Event Form -->
+            <section class="create-event-section">
+                <h2>Create a New Event</h2>
+                <form action="{{ url_for('create_event') }}" method="POST" class="create-event-form">
+                    <input type="text" name="title" placeholder="Event Title" required>
+                    <textarea name="description" placeholder="Event Description" required></textarea>
+                    <input type="date" name="date" required>
+                    <input type="time" name="time" required>
+                    <input type="text" name="location" placeholder="Location" required>
+                    <button type="submit" class="button">Create Event</button>
+                </form>
+            </section>
+
+            <!-- Manager's Events -->
+            <section class="manager-section">
+                <h2>Your Managed Events</h2>
+                <div class="events-grid">
+                    {% for event in manager_events %}
+                    <div class="event-card manager-card">
+                        <div class="event-details">
+                            <h3>{{ event.title }}</h3>
+                            <p><i class='bx bx-calendar'></i> {{ event.date }} at {{ event.time }}</p>
+                            <p><i class='bx bx-map'></i> {{ event.location }}</p>
+                            <p class="event-description">{{ event.description }}</p>
+                            <div class="event-actions">
+                                <a href="{{ url_for('edit_event', event_id=event.id) }}" class="button">Edit</a>
+                                <a href="{{ url_for('delete_event', event_id=event.id) }}" class="button danger">Delete</a>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <p>You haven’t created any events yet.</p>
+                    {% endfor %}
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer>
+            <p>&copy; 2025 Event Garden. All rights reserved.</p>
+        </footer>
+    </div>
+</body>
+</html>

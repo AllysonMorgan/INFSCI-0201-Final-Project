@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register - Event Garden</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+</head>
+<body>
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="flash {{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <div class="wrapper">
+        <form action="{{ url_for('register') }}" method="POST">
+            <h1>Create Account</h1>
+            
+            <!-- Username Field -->
+            <div class="input_box">
+                <input type="text" name="username" placeholder="Username" required minlength="4" maxlength="20">
+                <i class='bx bxs-user'></i>
+            </div>
+            
+            <!-- Password Field -->
+            <div class="input_box">
+                <input type="password" name="password" placeholder="Password" required minlength="6">
+                <i class='bx bxs-lock-alt'></i>
+            </div>
+            
+            <!-- Confirm Password Field -->
+            <div class="input_box">
+                <input type="password" name="confirm_password" placeholder="Confirm Password" required>
+                <i class='bx bxs-lock-alt'></i>
+            </div>
+            
+            <!-- Email Field (hidden since we auto-generate) -->
+            <input type="hidden" name="email" value="auto-generated">
+            
+            <!-- Manager Checkbox -->
+            <div class="managercheck">
+                <label>
+                    <input type="checkbox" name>
+                    
+                    <div class="register_link">
+                        <p> Already have an account? <a href="{{ url_for('userlogin') }}">Sign in here!</a></p>
+                    </div>
+                    <button type="submit" class="button" >Register</button>
+                </label>
+                </div>
+
+        
