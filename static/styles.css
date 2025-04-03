@@ -2,17 +2,21 @@
 * {
     margin: 0;
     padding: 0;
-    font-family: "Monaco", monospace;
+    font-family: "Winky Sans", sans-serif;
     box-sizing: border-box;
 }
 
 body {
-    background: url("floralBackground.jpeg") no-repeat;
     background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
     color: #6c6d56;
     min-height: 100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height: 100vh;
+    background: url("floralBackground.jpg") no-repeat;
+    background-size:cover;
+    background-position:center;
 }
 
 /* Shared Components */
@@ -29,7 +33,10 @@ body {
 h1, h2, h3 {
     color: #6c6d56;
 }
-
+.wrapper h1{
+    font-size: 42px;
+    text-align:center
+}
 .button {
     display: inline-block;
     padding: 12px 24px;
@@ -67,6 +74,17 @@ h1, h2, h3 {
     height: 50px;
     margin: 25px 0;
 }
+.event_input_box{
+    position: relative;
+    width: 19%;
+    height: 50px;
+    margin: 15px 0;
+    border: 2px solid #6c6d56;
+    border-radius: 30px;
+    font-size: 16px;
+    color: #6c6d56;
+    padding: 10px 10px 10px 10px;
+}
 
 .input_box input {
     width: 100%;
@@ -94,7 +112,6 @@ h1, h2, h3 {
 
 .managercheck {
     margin: 20px 0;
-    display: flex;
     align-items: center;
 }
 
@@ -170,7 +187,8 @@ h1, h2, h3 {
 
 /* Dashboard Styles */
 .dashboard-container {
-    max-width: 1200px;
+    max-width: 90%;
+    min-width:55%;
     margin: 0 auto;
     padding: 20px;
     background-color: rgba(255, 255, 255, 0.9);
@@ -185,7 +203,10 @@ h1, h2, h3 {
     padding-bottom: 20px;
     border-bottom: 2px solid #6c6d56;
 }
-
+.dashboard-header h1{
+    font-size:54px;
+    font-family: "Charm", cursive;
+}
 .user-controls {
     display: flex;
     gap: 15px;
@@ -379,4 +400,17 @@ footer {
     width: 16px;
     height: 16px;
     accent-color: #6c6d56;
+}
+
+.bigbutton{
+    width: 100%;
+    height:45px;
+    background:#e8e8cf;
+    border:2px solid #6c6d56;
+    outline:none;
+    border-radius:30px;
+    cursor:pointer;
+    font-size:18px;
+    font-weight:600;
+    color:#6c6d56
 }

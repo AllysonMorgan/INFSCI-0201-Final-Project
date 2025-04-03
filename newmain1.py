@@ -28,6 +28,15 @@ class User(db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
+class Event(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    date = db.Column(db.String(20), nullable=False)
+    time = db.Column(db.String(20), nullable=False)
+    location = db.Column(db.String(120), nullable=False)
+    manager_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
 # Routes
 @app.route('/')
 def home():
@@ -35,8 +44,19 @@ def home():
         return redirect(url_for('userlogin'))
 
     if session.get('is_manager'):
-        return render_template('manager_landing.html')
+        return redirect(url_for('manager_dashboard'))
+    
     return render_template('landing.html')
+
+@app.route('/manager_dashboard')
+def manager_dashboard():
+    if not session.get('is_manager'):
+        flash('Unauthorized access', 'danger')
+        return redirect(url_for('home'))
+    
+    manager = User.query.filter_by(username=session['username']).first()
+    events = Event.query.filter_by(manager_id=manager.id).all()
+    return render_template('manager_landing.html', manager_events=events)
 
 @app.route('/userlogin', methods=['GET', 'POST'])
 def userlogin():
@@ -102,7 +122,7 @@ def register():
             db.session.add(new_user)
             db.session.commit()
             flash('Registration successful! Please login.', 'success')
-            return redirect(url_for('login'))
+            return redirect(url_for('userlogin'))
         except Exception as e:
             db.session.rollback()
             flash(f'Registration failed: {str(e)}', 'danger')
@@ -113,6 +133,64 @@ def logout():
     session.clear()
     flash('You have been logged out.', 'info')
     return redirect(url_for('userlogin'))
+
+@app.route('/create_event', methods=['POST'])
+def create_event():
+    if not session.get('is_manager'):
+        flash('Unauthorized', 'danger')
+        return redirect(url_for('home'))
+
+    title = request.form['title']
+    description = request.form['description']
+    date = request.form['date']
+    time = request.form['time']
+    location = request.form['location']
+
+    manager = User.query.filter_by(username=session['username']).first()
+    new_event = Event(
+        title=title,
+        description=description,
+        date=date,
+        time=time,
+        location=location,
+        manager_id=manager.id
+    )
+    db.session.add(new_event)
+    db.session.commit()
+    flash('Event created successfully!', 'success')
+    return redirect(url_for('manager_dashboard'))
+
+@app.route('/edit_event/<int:event_id>', methods=['GET', 'POST'])
+def edit_event(event_id):
+    if 'username' not in session or not session.get('is_manager'):
+        flash('Only managers can edit events.', 'danger')
+        return redirect(url_for('home'))
+
+    event = Event.query.get_or_404(event_id)
+
+    if request.method == 'POST':
+        event.title = request.form.get('title')
+        event.description = request.form.get('description')
+        event.datetime = request.form.get('datetime')
+        event.location = request.form.get('location')
+        
+        db.session.commit()
+        flash('Event updated successfully!', 'success')
+        return redirect(url_for('home'))
+
+    return render_template('edit_event.html', event=event)
+
+@app.route('/delete_event/<int:event_id>', methods=['POST', 'GET'])
+def delete_event(event_id):
+    if 'username' not in session or not session.get('is_manager'):
+        flash('Unauthorized access', 'danger')
+        return redirect(url_for('home'))
+    
+    event = Event.query.get_or_404(event_id)
+    db.session.delete(event)
+    db.session.commit()
+    flash('Event deleted successfully!', 'success')
+    return redirect(url_for('manager_dashboard'))
 
 # Initialize database and create test users
 def initialize_database():
