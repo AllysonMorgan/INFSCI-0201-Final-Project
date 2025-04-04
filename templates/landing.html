@@ -17,6 +17,7 @@
             <h1>Event Garden</h1>
             <div class="user-controls">
                 <span>Welcome, {{ session.username }}!</span>
+                <a href="{{ url_for('usersettings') }}"><i class='bx bxs-cog' ></i></a>
                 {% if session.is_manager %}
                 <a href="#" class="button">Create Event</a>
                 {% endif %}

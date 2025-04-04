@@ -160,6 +160,10 @@ def create_event():
     flash('Event created successfully!', 'success')
     return redirect(url_for('manager_dashboard'))
 
+@app.route('/usersettings', methods=['GET', 'POST'])
+def usersettings():
+    return render_template("usersettings.html")
+
 @app.route('/edit_event/<int:event_id>', methods=['GET', 'POST'])
 def edit_event(event_id):
     if 'username' not in session or not session.get('is_manager'):

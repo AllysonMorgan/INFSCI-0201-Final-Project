@@ -18,6 +18,7 @@
             <h1>Event Garden</h1>
             <div class="user-controls">
                 <span>Welcome, {{ session.username }}!</span>
+                <a href="{{ url_for('usersettings') }}"><i class='bx bxs-cog' ></i></a>
                 <a href="{{ url_for('logout') }}" class="button">Logout</a>
             </div>
         </header>

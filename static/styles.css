@@ -109,6 +109,16 @@ h1, h2, h3 {
     transform: translateY(-50%);
     font-size: 18px;
 }
+.user-controls i{
+    font-size: 30px;
+    color: #6c6d56;
+}
+
+.user-controls i:hover{
+    font-size: 30px;
+    color: #6c6d56;
+    font-weight:600;
+    cursor:pointer}
 
 .managercheck {
     margin: 20px 0;
