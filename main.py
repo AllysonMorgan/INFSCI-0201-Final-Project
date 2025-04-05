@@ -45,8 +45,9 @@ def home():
 
     if session.get('is_manager'):
         return redirect(url_for('manager_dashboard'))
-    
-    return render_template('landing.html')
+    events=Event.query.all()
+
+    return render_template('landing.html',events=events)
 
 @app.route('/manager_dashboard')
 def manager_dashboard():
@@ -67,15 +68,21 @@ def userlogin():
         
         user = User.query.filter_by(username=username).first()
         
-        if user and user.check_password(password):
-            session['username'] = username
-            session['is_manager'] = (user.role == 'manager')
+        if user:
+            if user.role == 'manager':
+                flash('Managers cannot log in here. Please use the manager login.', 'warning')
+                return redirect(url_for('userlogin'))
             
-            if remember:
-                session.permanent = True
-            
-            flash('Login successful!', 'success')
-            return redirect(url_for('home'))
+            if user.check_password(password):
+                session['username'] = username
+                session['is_manager'] = False  
+                
+                if remember:
+                    session.permanent = True
+                
+                flash('Login successful!', 'success')
+                return redirect(url_for('home'))
+        
         flash('Invalid username or password', 'danger')
     return render_template('userlogin.html')
 
@@ -199,7 +206,6 @@ def delete_event(event_id):
 # Initialize database and create test users
 def initialize_database():
     with app.app_context():
-        db.drop_all()
         db.create_all()
         
         # Create test users if none exist
