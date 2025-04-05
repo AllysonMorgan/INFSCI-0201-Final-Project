@@ -30,10 +30,17 @@
                 <h2>Create a New Event</h2>
                 <form action="{{ url_for('create_event') }}" method="POST" class="create-event-form">
                     <input class="event_input_box" type="text" name="title" placeholder="Event Title" required>
-                    <input class="event_input_box" name="description" placeholder="Event Description" required>
+                    <select class="event_input_box" name="event_type" placeholder="Event Type" required>
+                        <option value="" disabled selected>Event Type</option>
+                        <option>Conference</option>
+                        <option>Workshop</option>
+                        <option>Meetup</option>
+                        <option>Other</option>
+                    </select>
                     <input class="event_input_box" type="date" name="date" required>
                     <input class="event_input_box" type="time" name="time" required>
                     <input class="event_input_box" type="text" name="location" placeholder="Location" required>
+                    <input class="big_input_box" name="description" placeholder="Event Description" required>
                     <button type="submit" class="button">Create Event</button>
                 </form>
             </section>
