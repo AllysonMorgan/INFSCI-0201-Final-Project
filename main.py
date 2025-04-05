@@ -205,29 +205,33 @@ def delete_event(event_id):
 
 # Initialize database and create test users
 def initialize_database():
-    with app.app_context():
-        db.create_all()
-        
-        # Create test users if none exist
-        if not User.query.first():
-            test_users = [
-                {'username': 'user', 'email': 'user@example.com', 'role': 'user', 'password': 'user123'},
-                {'username': 'manager', 'email': 'manager@example.com', 'role': 'manager', 'password': 'manager123'}
-            ]
+    db_file = 'events.db'
+    if not os.path.exists(db_file):
+        with app.app_context():
+            db.create_all()
             
-            for user_data in test_users:
-                user = User(
-                    username=user_data['username'],
-                    email=user_data['email'],
-                    role=user_data['role']
-                )
-                user.set_password(user_data['password'])
-                db.session.add(user)
-            
-            db.session.commit()
-            print("Created test users:")
-            print("- Regular: user/user123")
-            print("- Manager: manager/manager123")
+            # Create test users if none exist
+            if not User.query.first():
+                test_users = [
+                    {'username': 'user', 'email': 'user@example.com', 'role': 'user', 'password': 'user123'},
+                    {'username': 'manager', 'email': 'manager@example.com', 'role': 'manager', 'password': 'manager123'}
+                ]
+                
+                for user_data in test_users:
+                    user = User(
+                        username=user_data['username'],
+                        email=user_data['email'],
+                        role=user_data['role']
+                    )
+                    user.set_password(user_data['password'])
+                    db.session.add(user)
+                
+                db.session.commit()
+                print("Created test users:")
+                print("- Regular: user/user123")
+                print("- Manager: manager/manager123")
+    else:
+        print("Database already exists. No need to initialize.")
 
 if __name__ == '__main__':
     initialize_database()
