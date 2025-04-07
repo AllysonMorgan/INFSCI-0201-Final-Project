@@ -4,6 +4,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import timedelta, datetime
 import os
 from sqlalchemy import func, select, and_
+from flask_migrate import Migrate
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -15,6 +16,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(basedir, 'instance/events.db')}"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 # Association Table
 registrations = db.Table('registrations',
@@ -53,9 +55,18 @@ class Event(db.Model):
     date = db.Column(db.String(20), nullable=False)
     time = db.Column(db.String(20), nullable=False)
     location = db.Column(db.String(120), nullable=False)
+    event_type = db.Column(db.String(20), nullable=False, default='other')  # New field
     manager_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
+    def total_attendees(self):
+        total = db.session.scalar(
+            select(func.sum(registrations.c.num_attendees))
+            .where(registrations.c.event_id == self.id)
+        )
+        return total if total else 0
+    
+    @property
     def total_attendees(self):
         total = db.session.scalar(
             select(func.sum(registrations.c.num_attendees))
@@ -223,6 +234,7 @@ def create_event():
                 date=request.form['date'],
                 time=request.form['time'],
                 location=request.form['location'],
+                event_type=request.form['event_type'], 
                 manager_id=manager.id
             )
             db.session.add(new_event)
@@ -301,10 +313,11 @@ def event_details(event_id):
         .where(registrations.c.event_id == event.id)
     ).fetchone() is not None
     
+    # Changed to pass the property value directly
     return render_template('event_details.html', 
                          event=event,
                          is_registered=is_registered,
-                         total_attendees=event.total_attendees())
+                         total_attendees=event.total_attendees) 
 
 @app.route('/register_for_event/<int:event_id>', methods=['POST'])
 def register_for_event(event_id):
