@@ -68,7 +68,12 @@
                 <a href="{{ url_for('home') }}" class="button" style="margin-right: 15px;">
                     <i class='bx bx-arrow-back'></i> Back
                 </a>
-                <h1>{{ event.title }}</h1>
+                <div class="event-header">
+                    <h1>{{ event.title }}</h1>
+                    <span class="event-type-badge {{ event.event_type }}">
+                        {{ event.event_type|capitalize }}
+                    </span>
+                </div>
             </div>
             <div class="user-controls">
                 <span>Welcome, {{ session.username }}!</span>

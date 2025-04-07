@@ -37,15 +37,12 @@
 </head>
 <body>
     <div class="dashboard-container">
-        <!-- Header -->
+        <!-- Updated Header -->
         <header class="dashboard-header">
             <h1>Event Garden</h1>
             <div class="user-controls">
                 <span>Welcome, {{ session.username }}!</span>
                 <a href="{{ url_for('usersettings') }}" title="Settings"><i class='bx bxs-cog'></i></a>
-                {% if session.is_manager %}
-                <a href="{{ url_for('manager_dashboard') }}" class="button">Manager Dashboard</a>
-                {% endif %}
                 <a href="{{ url_for('logout') }}" class="button">Logout</a>
             </div>
         </header>
@@ -91,14 +88,19 @@
                     <div class="event-card">
                         <div class="event-image" style="background-image: url('/static/default-event.jpg');"></div>
                         <div class="event-details">
-                            <h3>{{ event.title }}</h3>
+                            <div class="event-header">
+                                <h1>{{ event.title }}</h1>
+                                <span class="event-type-badge {{ event.event_type }}">
+                                    {{ event.event_type|capitalize }}
+                                </span>
+                            </div>
                             <p><i class='bx bx-calendar'></i> {{ event.date }} at {{ event.time }}</p>
                             <p><i class='bx bx-map'></i> {{ event.location }}</p>
                             <p class="event-description">{{ event.description[:100] }}{% if event.description|length > 100 %}...{% endif %}</p>
                             <div class="event-actions">
                                 <a href="{{ url_for('event_details', event_id=event.id) }}" class="button">View Details</a>
                                 <span class="attendees">
-                                    <i class='bx bx-user'></i> {{ event.total_attendees() }} attending
+                                    <i class='bx bx-user'></i> {{ event.total_attendees }} attending
                                 </span>
                             </div>
                         </div>
@@ -108,9 +110,6 @@
                 {% else %}
                 <div class="no-events">
                     <p>No upcoming events found.</p>
-                    {% if session.is_manager %}
-                    <a href="{{ url_for('create_event') }}" class="button">Create Your First Event</a>
-                    {% endif %}
                 </div>
                 {% endif %}
             </section>
@@ -126,7 +125,6 @@
         // Make event cards clickable
         document.querySelectorAll('.event-card').forEach(card => {
             card.addEventListener('click', (e) => {
-                // Don't redirect if clicking on a button or link
                 if (!e.target.closest('a') && !e.target.closest('button')) {
                     const link = card.querySelector('a[href*="/event/"]');
                     if (link) {

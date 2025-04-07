@@ -35,7 +35,6 @@
             display: flex;
             gap: 10px;
             margin-top: 15px;
-            flex-wrap: wrap;
         }
         @media (max-width: 768px) {
             .manager-actions {
@@ -49,6 +48,7 @@
 </head>
 <body>
     <div class="dashboard-container">
+        <!-- Updated Header -->
         <header class="dashboard-header">
             <h1>Manager Dashboard</h1>
             <div class="user-controls">
@@ -78,12 +78,17 @@
                     {% for event in manager_events %}
                     <div class="event-card">
                         <div class="event-image" style="background-image: url('/static/default-event.jpg');">
-                            <span class="attendee-badge">
+                            <span class="attendees">
                                 <i class='bx bx-group'></i> {{ event.total_attendees }} attending
                             </span>
                         </div>
                         <div class="event-details">
-                            <h3>{{ event.title }}</h3>
+                            <div class="event-header">
+                                <h1>{{ event.title }}</h1>
+                                <span class="event-type-badge {{ event.event_type }}">
+                                    {{ event.event_type|capitalize }}
+                                </span>
+                            </div>
                             <p><i class='bx bx-calendar'></i> {{ event.date }} at {{ event.time }}</p>
                             <p><i class='bx bx-map'></i> {{ event.location }}</p>
                             <p class="event-description">{{ event.description[:100] }}{% if event.description|length > 100 %}...{% endif %}</p>
