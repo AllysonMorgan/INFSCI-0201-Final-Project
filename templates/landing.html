@@ -9,6 +9,31 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Charm:wght@400;700&family=Winky+Sans:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
+    <style>
+        .event-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+        }
+        .attendees {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 600;
+            color: #6c6d56;
+        }
+        .button {
+            padding: 8px 16px;
+            text-decoration: none;
+        }
+        .event-card {
+            transition: transform 0.3s ease;
+        }
+        .event-card:hover {
+            transform: translateY(-5px);
+        }
+    </style>
 </head>
 <body>
     <div class="dashboard-container">
@@ -17,31 +42,42 @@
             <h1>Event Garden</h1>
             <div class="user-controls">
                 <span>Welcome, {{ session.username }}!</span>
-                <a href="{{ url_for('usersettings') }}"><i class='bx bxs-cog' ></i></a>
+                <a href="{{ url_for('usersettings') }}" title="Settings"><i class='bx bxs-cog'></i></a>
                 {% if session.is_manager %}
-                <a href="#" class="button">Create Event</a>
+                <a href="{{ url_for('manager_dashboard') }}" class="button">Manager Dashboard</a>
                 {% endif %}
                 <a href="{{ url_for('logout') }}" class="button">Logout</a>
             </div>
         </header>
 
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
         <!-- Main Content -->
         <main>
             <!-- Search and Filter -->
             <section class="search-section">
-                <form class="search-form">
+                <form class="search-form" action="{{ url_for('home') }}" method="GET">
                     <div class="search-box">
-                        <input type="text" placeholder="Search events...">
+                        <input type="text" name="query" placeholder="Search events..." value="{{ request.args.get('query', '') }}">
                         <button type="submit"><i class='bx bx-search'></i></button>
                     </div>
                     <div class="filters">
-                        <select>
-                            <option>All Event Types</option>
-                            <option>Conference</option>
-                            <option>Workshop</option>
-                            <option>Meetup</option>
+                        <select name="event_type">
+                            <option value="">All Event Types</option>
+                            <option value="conference">Conference</option>
+                            <option value="workshop">Workshop</option>
+                            <option value="meetup">Meetup</option>
                         </select>
-                        <input type="date" id="event-date">
+                        <input type="date" name="event_date">
                     </div>
                 </form>
             </section>
@@ -49,28 +85,35 @@
             <!-- Events Grid -->
             <section class="events-section">
                 <h2>Upcoming Events</h2>
+                {% if events %}
                 <div class="events-grid">
                     {% for event in events %}
-        <div class="event-card">
-            <div class="event-image" style="background-image: url('/static/event1.jpg');"></div>
-            <div class="event-details">
-                <h3>{{ event.title }}</h3>
-                <p><i class='bx bx-calendar'></i> {{ event.date }} at {{ event.time }}</p>
-                <p><i class='bx bx-map'></i> {{ event.location }}</p>
-                <p class="event-description">{{ event.description }}</p>
-                <div class="event-actions">
-                    <a href="#" class="button">View Details</a>
-                    <span class="attendees">120 attending</span>
-                </div>
-            </div>
-        </div>
-        {% endfor %}
+                    <div class="event-card">
+                        <div class="event-image" style="background-image: url('/static/default-event.jpg');"></div>
+                        <div class="event-details">
+                            <h3>{{ event.title }}</h3>
+                            <p><i class='bx bx-calendar'></i> {{ event.date }} at {{ event.time }}</p>
+                            <p><i class='bx bx-map'></i> {{ event.location }}</p>
+                            <p class="event-description">{{ event.description[:100] }}{% if event.description|length > 100 %}...{% endif %}</p>
+                            <div class="event-actions">
+                                <a href="{{ url_for('event_details', event_id=event.id) }}" class="button">View Details</a>
+                                <span class="attendees">
+                                    <i class='bx bx-user'></i> {{ event.total_attendees() }} attending
+                                </span>
+                            </div>
+                        </div>
                     </div>
-
-                    
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="no-events">
+                    <p>No upcoming events found.</p>
+                    {% if session.is_manager %}
+                    <a href="{{ url_for('create_event') }}" class="button">Create Your First Event</a>
+                    {% endif %}
+                </div>
+                {% endif %}
             </section>
-
-
         </main>
 
         <!-- Footer -->
@@ -78,5 +121,20 @@
             <p>&copy; 2025 Event Garden. All rights reserved.</p>
         </footer>
     </div>
+
+    <script>
+        // Make event cards clickable
+        document.querySelectorAll('.event-card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                // Don't redirect if clicking on a button or link
+                if (!e.target.closest('a') && !e.target.closest('button')) {
+                    const link = card.querySelector('a[href*="/event/"]');
+                    if (link) {
+                        window.location.href = link.href;
+                    }
+                }
+            });
+        });
+    </script>
 </body>
 </html>

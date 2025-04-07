@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Event</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="dashboard-container">
+        <h1>Create New Event</h1>
+        <form method="POST" action="{{ url_for('create_event') }}">
+            <div class="input_box">
+                <input type="text" name="title" placeholder="Event Title" required>
+            </div>
+            <div class="input_box">
+                <textarea name="description" placeholder="Description" required></textarea>
+            </div>
+            <div class="input_box">
+                <input type="date" name="date" required>
+            </div>
+            <div class="input_box">
+                <input type="time" name="time" required>
+            </div>
+            <div class="input_box">
+                <input type="text" name="location" placeholder="Location" required>
+            </div>
+            <button type="submit" class="bigbutton">Create Event</button>
+            <a href="{{ url_for('manager_dashboard') }}" class="button">Cancel</a>
+        </form>
+    </div>
+</body>
+</html>
