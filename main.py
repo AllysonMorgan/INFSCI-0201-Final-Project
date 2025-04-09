@@ -104,7 +104,7 @@ def home():
         return redirect(url_for('userlogin'))
     
     if session.get('is_manager'):
-        return redirect(url_for('manager_landing'))
+        return redirect(url_for('manager_dashboard'))
     
     events = Event.query.order_by(Event.date.asc()).all()
     return render_template('landing.html', events=events)
