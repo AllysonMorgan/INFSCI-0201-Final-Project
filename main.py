@@ -104,20 +104,31 @@ def home():
         return redirect(url_for('userlogin'))
     
     if session.get('is_manager'):
-        return redirect(url_for('manager_dashboard'))
+        return redirect(url_for('manager_landing'))
     
     events = Event.query.order_by(Event.date.asc()).all()
     return render_template('landing.html', events=events)
 
 @app.route('/manager_dashboard')
 def manager_dashboard():
-    if not session.get('is_manager'):
-        flash('Unauthorized access', 'danger')
-        return redirect(url_for('home'))
-    
-    manager = User.query.filter_by(username=session['username']).first()
-    events = Event.query.filter_by(manager_id=manager.id).order_by(Event.date.asc()).all()
-    return render_template('manager_landing.html', manager_events=events)
+    if 'user_id' not in session:
+        return redirect(url_for('managerlogin'))
+
+    user = User.query.get(session['user_id'])
+
+    # Events created by the current manager
+    your_events = Event.query.filter_by(manager_id=user.id).all()
+
+    # Events created by other managers
+    other_events = Event.query.filter(Event.manager_id != user.id).all()
+
+    return render_template(
+        'manager_landing.html',
+        username=user.username,
+        your_events=your_events,
+        other_events=other_events
+    )
+
 
 @app.route('/userlogin', methods=['GET', 'POST'])
 def userlogin():
@@ -152,8 +163,9 @@ def managerlogin():
         if user and user.check_password(password):
             session['username'] = username
             session['is_manager'] = True
+            session['user_id'] = user.id
             flash('Manager login successful!', 'success')
-            return redirect(url_for('home'))
+            return redirect(url_for('manager_dashboard'))
         
         flash('Invalid manager credentials', 'danger')
     return render_template('managerlogin.html')
