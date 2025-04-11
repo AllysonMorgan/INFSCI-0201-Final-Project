@@ -103,11 +103,16 @@ def home():
     if 'username' not in session:
         return redirect(url_for('userlogin'))
     
-    if session.get('is_manager'):
-        return redirect(url_for('manager_dashboard'))
+    user = User.query.filter_by(username=session['username']).first()
+    registered_events = user.registered_events if user else []
+    all_events = Event.query.order_by(Event.date.asc()).all()
     
-    events = Event.query.order_by(Event.date.asc()).all()
-    return render_template('landing.html', events=events)
+    # Filter out registered events from all events
+    upcoming_events = [event for event in all_events if event not in registered_events]
+    
+    return render_template('landing.html', 
+                         events=upcoming_events,
+                         registered_events=registered_events)
 
 @app.route('/manager_dashboard')
 def manager_dashboard():
@@ -334,6 +339,8 @@ def event_details(event_id):
 @app.route('/register_for_event/<int:event_id>', methods=['POST'])
 def register_for_event(event_id):
     if 'username' not in session:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({'success': False, 'message': 'Please login first'}), 401
         return redirect(url_for('userlogin'))
     
     event = Event.query.get_or_404(event_id)
@@ -346,12 +353,16 @@ def register_for_event(event_id):
     ).fetchone()
     
     if existing_reg:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({'success': False, 'message': 'You are already registered for this event'})
         flash('You are already registered for this event', 'warning')
         return redirect(url_for('event_details', event_id=event.id))
     
     try:
         num_attendees = int(request.form.get('num_attendees', 1))
         if num_attendees < 1:
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return jsonify({'success': False, 'message': 'Number of attendees must be at least 1'})
             flash('Number of attendees must be at least 1', 'danger')
             return redirect(url_for('event_details', event_id=event.id))
         
@@ -363,9 +374,20 @@ def register_for_event(event_id):
             )
         )
         db.session.commit()
+        
+        # Get updated attendees count
+        total_attendees = event.total_attendees
+        
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({
+                'success': True,
+                'total_attendees': total_attendees
+            })
         flash(f'Successfully registered {num_attendees} attendee(s)!', 'success')
     except Exception as e:
         db.session.rollback()
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({'success': False, 'message': f'Registration failed: {str(e)}'})
         flash(f'Registration failed: {str(e)}', 'danger')
     
     return redirect(url_for('event_details', event_id=event.id))
@@ -373,6 +395,8 @@ def register_for_event(event_id):
 @app.route('/unregister_from_event/<int:event_id>', methods=['POST'])
 def unregister_from_event(event_id):
     if 'username' not in session:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({'success': False, 'message': 'Please login first'}), 401
         return redirect(url_for('userlogin'))
     
     event = Event.query.get_or_404(event_id)
@@ -385,9 +409,20 @@ def unregister_from_event(event_id):
             .where(registrations.c.event_id == event.id)
         )
         db.session.commit()
+        
+        # Get updated attendees count
+        total_attendees = event.total_attendees
+        
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({
+                'success': True,
+                'total_attendees': total_attendees
+            })
         flash('Successfully unregistered from event', 'success')
     except Exception as e:
         db.session.rollback()
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({'success': False, 'message': f'Failed to unregister: {str(e)}'})
         flash(f'Failed to unregister: {str(e)}', 'danger')
     
     return redirect(url_for('event_details', event_id=event.id))

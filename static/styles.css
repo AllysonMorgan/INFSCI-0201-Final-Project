@@ -892,4 +892,18 @@ input[type="time"] {
     .dashboard-header {
         padding-top: 20px;
     }
+} 
+
+/* Add to your styles.css */
+select:focus, select:active {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(108, 109, 86, 0.2);
+}
+
+.no-events-message {
+    text-align: center;
+    padding: 20px;
+    font-size: 1.2rem;
+    color: var(--primary-color);
+    display: none; /* Hidden by default */
 }

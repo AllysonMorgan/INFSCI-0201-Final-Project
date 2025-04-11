@@ -12,10 +12,16 @@
     <style>
         .event-card {
             position: relative;
-            transition: transform 0.3s ease;
+            transition: transform 0.3s ease, opacity 0.3s ease;
         }
-        .event-card:hover {
-            transform: translateY(-5px);
+        .event-card.hidden {
+            opacity: 0;
+            transform: scale(0.95);
+            height: 0;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+            border: none;
         }
         .attendee-badge {
             position: absolute;
@@ -36,7 +42,77 @@
             gap: 10px;
             margin-top: 15px;
         }
+        .no-events-message {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2rem;
+            color: #6c6d56;
+            grid-column: 1 / -1;
+            display: none;
+        }
+        .filter-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            position: relative;
+        }
+        .search-box input {
+            width: 100%;
+            padding: 10px 15px;
+            padding-right: 40px;
+            border: 2px solid #6c6d56;
+            border-radius: 30px;
+            background: transparent;
+            color: #6c6d56;
+            font-size: 1rem;
+        }
+        .search-box button {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: #6c6d56;
+            cursor: pointer;
+        }
+        .filters {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        .filters select, .filters input {
+            padding: 10px 15px;
+            border: 2px solid #6c6d56;
+            border-radius: 30px;
+            background: transparent;
+            color: #6c6d56;
+            font-size: 1rem;
+        }
+        #resetFilters {
+            padding: 10px 20px;
+            background: #f0f0e0;
+            border: 2px solid #6c6d56;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        #resetFilters:hover {
+            background: #e0e0d0;
+        }
         @media (max-width: 768px) {
+            .filter-controls {
+                flex-direction: column;
+            }
+            .search-box {
+                width: 100%;
+            }
             .manager-actions {
                 flex-direction: column;
             }
@@ -69,13 +145,38 @@
         {% endwith %}
 
         <main>
+            <!-- Search and Filter Controls -->
+            <section class="search-section">
+                <div class="filter-controls">
+                    <div class="search-box">
+                        <input type="text" id="searchInput" placeholder="Search events...">
+                        <button type="button" id="searchButton"><i class='bx bx-search'></i></button>
+                    </div>
+                    <div class="filters">
+                        <select name="event_type" id="eventTypeFilter">
+                            <option value="">All Event Types</option>
+                            <option value="workshop">Workshop</option>
+                            <option value="meeting">Meeting</option>
+                            <option value="training">Training</option>
+                            <option value="other">Other</option>
+                        </select>
+                        <input type="date" name="event_date" id="dateFilter">
+                    </div>
+                    <button id="resetFilters" class="button">Reset Filters</button>
+                </div>
+            </section>
+
             <!-- Your Events -->
             <section class="events-section">
                 <h2>Your Events</h2>
                 {% if your_events %}
-                    <div class="events-grid">
+                    <div class="events-grid your-events">
                         {% for event in your_events %}
-                        <div class="event-card">
+                        <div class="event-card" 
+                             data-event-type="{{ event.event_type }}" 
+                             data-event-date="{{ event.date }}"
+                             data-event-title="{{ event.title.lower() }}"
+                             data-event-description="{{ event.description.lower() }}">
                             <div class="event-image" style="background-image: url('/static/default-event.jpg');">
                                 <span class="attendees">
                                     <i class='bx bx-group'></i> {{ event.total_attendees }} attending
@@ -107,6 +208,9 @@
                             </div>
                         </div>
                         {% endfor %}
+                        <div class="no-events-message your-events-message">
+                            No events match your selected filters
+                        </div>
                     </div>
                 {% else %}
                     <div class="no-events">
@@ -120,9 +224,13 @@
             <section class="events-section">
                 <h2>Events by Other Managers</h2>
                 {% if other_events %}
-                    <div class="events-grid">
+                    <div class="events-grid other-events">
                         {% for event in other_events %}
-                        <div class="event-card">
+                        <div class="event-card" 
+                             data-event-type="{{ event.event_type }}" 
+                             data-event-date="{{ event.date }}"
+                             data-event-title="{{ event.title.lower() }}"
+                             data-event-description="{{ event.description.lower() }}">
                             <div class="event-image" style="background-image: url('/static/default-event.jpg');">
                                 <span class="attendees">
                                     <i class='bx bx-group'></i> {{ event.total_attendees }} attending
@@ -146,6 +254,9 @@
                             </div>
                         </div>
                         {% endfor %}
+                        <div class="no-events-message other-events-message">
+                            No events match your selected filters
+                        </div>
                     </div>
                 {% else %}
                     <div class="no-events">
@@ -159,5 +270,102 @@
             <p>&copy; 2025 Event Garden. All rights reserved.</p>
         </footer>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            const searchButton = document.getElementById('searchButton');
+            const eventTypeFilter = document.getElementById('eventTypeFilter');
+            const dateFilter = document.getElementById('dateFilter');
+            const resetButton = document.getElementById('resetFilters');
+            
+            // Separate selectors for your events and other events
+            const yourEventCards = document.querySelectorAll('.your-events .event-card');
+            const otherEventCards = document.querySelectorAll('.other-events .event-card');
+            const yourNoEventsMsg = document.querySelector('.your-events-message');
+            const otherNoEventsMsg = document.querySelector('.other-events-message');
+
+            function filterEvents() {
+                const searchTerm = searchInput.value.toLowerCase();
+                const selectedType = eventTypeFilter.value.toLowerCase();
+                const selectedDate = dateFilter.value;
+                
+                let yourVisibleCount = 0;
+                let otherVisibleCount = 0;
+
+                // Filter your events
+                yourEventCards.forEach(card => {
+                    const eventType = card.dataset.eventType.toLowerCase();
+                    const eventDate = card.dataset.eventDate;
+                    const eventTitle = card.dataset.eventTitle;
+                    const eventDescription = card.dataset.eventDescription;
+                    
+                    const typeMatch = selectedType === '' || eventType === selectedType;
+                    const dateMatch = selectedDate === '' || eventDate === selectedDate;
+                    const searchMatch = searchTerm === '' || 
+                                       eventTitle.includes(searchTerm) || 
+                                       eventDescription.includes(searchTerm);
+                    
+                    if (typeMatch && dateMatch && searchMatch) {
+                        card.classList.remove('hidden');
+                        yourVisibleCount++;
+                    } else {
+                        card.classList.add('hidden');
+                    }
+                });
+
+                // Filter other events
+                otherEventCards.forEach(card => {
+                    const eventType = card.dataset.eventType.toLowerCase();
+                    const eventDate = card.dataset.eventDate;
+                    const eventTitle = card.dataset.eventTitle;
+                    const eventDescription = card.dataset.eventDescription;
+                    
+                    const typeMatch = selectedType === '' || eventType === selectedType;
+                    const dateMatch = selectedDate === '' || eventDate === selectedDate;
+                    const searchMatch = searchTerm === '' || 
+                                       eventTitle.includes(searchTerm) || 
+                                       eventDescription.includes(searchTerm);
+                    
+                    if (typeMatch && dateMatch && searchMatch) {
+                        card.classList.remove('hidden');
+                        otherVisibleCount++;
+                    } else {
+                        card.classList.add('hidden');
+                    }
+                });
+
+                // Show/hide no events messages
+                yourNoEventsMsg.style.display = yourVisibleCount === 0 ? 'block' : 'none';
+                otherNoEventsMsg.style.display = otherVisibleCount === 0 ? 'block' : 'none';
+            }
+
+            function resetFilters() {
+                searchInput.value = '';
+                eventTypeFilter.value = '';
+                dateFilter.value = '';
+                filterEvents();
+            }
+
+            // Add event listeners
+            searchInput.addEventListener('input', filterEvents);
+            searchButton.addEventListener('click', filterEvents);
+            eventTypeFilter.addEventListener('change', filterEvents);
+            dateFilter.addEventListener('change', filterEvents);
+            resetButton.addEventListener('click', resetFilters);
+
+            // Make event cards clickable
+            document.querySelectorAll('.event-card').forEach(card => {
+                card.addEventListener('click', (e) => {
+                    if (!e.target.closest('a') && !e.target.closest('button') && !e.target.closest('form')) {
+                        const link = card.querySelector('a[href*="/event/"]');
+                        if (link) {
+                            window.location.href = link.href;
+                        }
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>
