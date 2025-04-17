@@ -235,6 +235,29 @@ def usersettings():
     
     return render_template('usersettings.html', user=user)
 
+@app.route('/user_profile')
+def user_profile():
+    if 'username' not in session:
+        flash("You must be logged in to view your profile.")
+        return redirect(url_for('userlogin'))
+
+    user = User.query.filter_by(username=session['username']).first()
+
+    if not user:
+        flash("User not found.")
+        return redirect(url_for('userlogin'))
+
+    return render_template(
+        'user_profile.html',
+        username=user.username,
+        email=user.email,
+        password_hidden='*' * 10,
+        role=user.role,
+        created_at=user.created_at,
+        registered_events=user.registered_events
+    )
+
+
 @app.route('/create_event', methods=['GET', 'POST'])
 def create_event():
     if not session.get('is_manager'):
