@@ -5,6 +5,7 @@ from datetime import timedelta, datetime
 import os
 from sqlalchemy import func, select, and_
 from flask_migrate import Migrate
+from geopy.geocoders import Nominatim
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -102,7 +103,6 @@ with app.app_context():
 def home():
     if 'username' not in session:
         return redirect(url_for('userlogin'))
-    
     user = User.query.filter_by(username=session['username']).first()
     registered_events = user.registered_events if user else []
     all_events = Event.query.order_by(Event.date.asc()).all()
@@ -352,12 +352,20 @@ def event_details(event_id):
         .where(registrations.c.user_id == user.id)
         .where(registrations.c.event_id == event.id)
     ).fetchone() is not None
-    
-    # Changed to pass the property value directly
+    geolocator = Nominatim(user_agent="event_locator")
+    location = geolocator.geocode(event.location)
+    if location:
+        latitude = location.latitude
+        longitude = location.longitude
+    else:
+        latitude = None
+        longitude = None
+
     return render_template('event_details.html', 
                          event=event,
                          is_registered=is_registered,
-                         total_attendees=event.total_attendees) 
+                         total_attendees=event.total_attendees,
+                         latitude=latitude, longitude=longitude) 
 
 @app.route('/register_for_event/<int:event_id>', methods=['POST'])
 def register_for_event(event_id):

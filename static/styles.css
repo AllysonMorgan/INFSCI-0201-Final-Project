@@ -16,6 +16,7 @@ body {
     min-height: 100vh;
     background: url("floralBackground.jpg") no-repeat;
     background-position:center;
+    font-family: 'Winky Sans', sans-serif;
 }
 
 /* Shared Components */
@@ -211,11 +212,13 @@ h1, h2, h3 {
 /* Dashboard Styles */
 .dashboard-container {
     max-width: 90%;
-    min-width:55%;
+    min-width: 60%;
     margin: 0 auto;
     padding: 20px;
     background-color: rgba(255, 255, 255, 0.9);
-    min-height: 100vh;
+    min-height: 100vh; 
+    height: 80vh;
+    overflow-y: auto;
 }
 
 .dashboard-header {
@@ -511,7 +514,6 @@ footer {
     color: #6c6d56;
     padding: 15px 20px;
     resize: vertical;
-    font-family: inherit;
 }
 
 .input_box input,
@@ -524,7 +526,6 @@ footer {
     font-size: 16px;
     color: #6c6d56;
     background: transparent;
-    font-family: inherit;
 }
 
 .input_box {

@@ -9,13 +9,18 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Charm:wght@400;700&family=Wix+Madefor+Display:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAdszg_J7H6_CkZfHkaX8ivISBnMu2FVzo&callback=initMap" async defer></script>
     <style>
+        .body {
+            font-family: 'Winky Sans', sans-serif;
+        }
         .event-details-container {
             background: rgba(255, 255, 255, 0.9);
             border-radius: 15px;
             padding: 30px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
             margin-top: 20px;
+            font-family: 'Winky Sans', sans-serif;
         }
         .event-meta {
             display: flex;
@@ -28,6 +33,7 @@
             align-items: center;
             gap: 8px;
             font-size: 18px;
+            font-family: 'Winky Sans', sans-serif;
         }
         .event-description {
             background: #f8f8f8;
@@ -35,6 +41,7 @@
             border-radius: 10px;
             margin: 25px 0;
             line-height: 1.6;
+            font-family: 'Winky Sans', sans-serif;
         }
         .event-image {
             width: 100%;
@@ -52,6 +59,25 @@
             gap: 8px;
             margin: 20px 0;
         }
+        .input_box{
+            margin-bottom:15px;
+        }
+
+        .input_box input{
+            width: 100%;
+            padding: 10px 15px;
+            padding-right: 40px;
+            border: 2px solid #6c6d56;
+            border-radius: 30px;
+            background: transparent;
+            color: #6c6d56;
+            font-size: 1rem;
+            font-family: 'Winky Sans', sans-serif;
+        }
+        .button {
+            display: inline-block;
+            margin-top: 20px;
+        }
         @media (max-width: 768px) {
             .event-actions {
                 flex-direction: column;
@@ -65,9 +91,15 @@
         <!-- Header with back button -->
         <header class="dashboard-header">
             <div>
-                <a href="{{ url_for('home') }}" class="button" style="margin-right: 15px;">
-                    <i class='bx bx-arrow-back'></i> Back
-                </a>
+                {% if session.is_manager %}
+    <a href="{{ url_for('manager_dashboard') }}" class="button" style="margin-right: 15px;">
+        <i class='bx bx-arrow-back'></i> Back
+    </a>
+{% else %}
+    <a href="{{ url_for('home') }}" class="button" style="margin-right: 15px;">
+        <i class='bx bx-arrow-back'></i> Back
+    </a>
+{% endif %}
                 <div class="event-header">
                     <h1>{{ event.title }}</h1>
                     <span class="event-type-badge {{ event.event_type }}">
@@ -111,14 +143,41 @@
                     <span>{{ total_attendees }} attending</span>
                 </div>
             </div>
-
+            <div id="map" style="height: 400px; margin-top: 20px;"></div>
+            <script>
+                function initMap() {
+                    // Check if latitude and longitude are valid
+                    const lat = {{ latitude if latitude is not none else 'null' }};
+                    const lng = {{ longitude if longitude is not none else 'null' }};
+            
+                    // If lat or lng is null, you can set a default location or handle the error
+                    const eventLocation = { lat: lat, lng: lng };
+            
+                    // Create the map
+                    const map = new google.maps.Map(document.getElementById("map"), {
+                        zoom: 15,
+                        center: eventLocation,
+                    });
+            
+                    // Only create a marker if lat and lng are valid
+                    if (lat !== null && lng !== null) {
+                        const marker = new google.maps.Marker({
+                            position: eventLocation,
+                            map: map,
+                            title: "{{ event.location }}",
+                        });
+                    } else {
+                        console.error("Invalid location coordinates.");
+                    }
+                }
+            </script>
             <div class="event-description">
                 <h3>Event Description</h3>
                 <p>{{ event.description }}</p>
             </div>
 
             <!-- Registration Form -->
-            <div class="event-actions">
+            <div>
                 {% if not is_registered %}
                 <form method="POST" action="{{ url_for('register_for_event', event_id=event.id) }}">
                     <div class="input_box">
