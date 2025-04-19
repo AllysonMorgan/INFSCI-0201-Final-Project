@@ -235,6 +235,33 @@ def usersettings():
     
     return render_template('usersettings.html', user=user)
 
+@app.route('/managersettings', methods=['GET', 'POST'])
+def managersettings():
+    if 'username' not in session:
+        return redirect(url_for('managerlogin'))
+
+    user = User.query.filter_by(username=session['username']).first()
+
+    if request.method == 'POST':
+        new_username = request.form['username']
+        new_password = request.form['password']
+
+        if new_username and new_username != user.username:
+            if User.query.filter_by(username=new_username).first():
+                flash('Username already taken', 'danger')
+            else:
+                user.username = new_username
+                flash('Username updated successfully', 'success')
+
+        if new_password:
+            user.set_password(new_password)
+            flash('Password updated successfully', 'success')
+
+        db.session.commit()
+        return redirect(url_for('managersettings'))
+
+    return render_template('managersettings.html', user=user)
+
 @app.route('/user_profile')
 def user_profile():
     if 'username' not in session:
@@ -257,6 +284,27 @@ def user_profile():
         registered_events=user.registered_events
     )
 
+@app.route('/manager_profile')
+def manager_profile():
+    if 'username' not in session:
+        flash("You must be logged in to view your profile.")
+        return redirect(url_for('managerlogin'))
+
+    user = User.query.filter_by(username=session['username']).first()
+
+    if not user or user.role != 'manager':
+        flash("Unauthorized access.")
+        return redirect(url_for('home'))
+
+    return render_template(
+        'manager_profile.html',
+        username=user.username,
+        email=user.email,
+        password_hidden='*' * 10,
+        role=user.role,
+        created_at=user.created_at,
+        created_events=user.managed_events
+    )
 
 @app.route('/create_event', methods=['GET', 'POST'])
 def create_event():
