@@ -129,6 +129,7 @@
             <div class="user-controls">
                 <span>Welcome, {{ session.username }}!</span>
                 <a href="{{ url_for('usersettings') }}" title="Settings"><i class='bx bxs-cog'></i></a>
+                <a href="{{ url_for('manager_profile') }}" class="button">My Profile</a>               
                 <a href="{{ url_for('create_event') }}" class="button">Create Event</a>
                 <a href="{{ url_for('logout') }}" class="button">Logout</a>
             </div>
