@@ -371,7 +371,7 @@ footer {
     border-top: 1px solid #ddd;
 }
 
-/* Responsive Design */
+
 @media (max-width: 768px) {
     .wrapper {
         width: 90%;
@@ -600,11 +600,11 @@ footer {
     }
 } 
 
-/* Improved form layout for create/edit events */
+
 .event-form {
     display: flex;
     flex-direction: column;
-    gap: 20px; /* Space between form elements */
+    gap: 20px; 
     max-width: 600px;
     margin: 0 auto;
 }
@@ -619,7 +619,7 @@ footer {
     padding: 10px;
     border: 1px solid #ddd;
     border-radius: 4px;
-    resize: vertical; /* Allows vertical resizing only */
+    resize: vertical;
 }
 
 .form-select {
@@ -638,7 +638,6 @@ input[type="time"] {
     border-radius: 4px;
 } 
 
-/* Improved registration form layout */
 .registration-form {
     display: flex;
     flex-direction: column;
@@ -796,15 +795,15 @@ input[type="time"] {
     background: #e5e5e5;
 } 
 
-/* Registration Form Button Fixes */
+
 .registration-form {
     display: flex;
     flex-direction: column;
-    gap: 30px;  /* Increased gap between form sections */
+    gap: 30px;  
 }
 
 .attendee-control {
-    margin-bottom: 40px;  /* More space above buttons */
+    margin-bottom: 40px;  
     padding: 25px;
     background: #f5f5f0;
     border-radius: 10px;
@@ -813,8 +812,8 @@ input[type="time"] {
 
 .form-actions {
     display: flex;
-    gap: 25px;  /* Increased gap between buttons */
-    margin-top: 0;  /* Remove any top margin */
+    gap: 25px;  
+    margin-top: 0;
     padding-top: 20px;
 }
 
@@ -852,7 +851,7 @@ input[type="time"] {
     }
 }
 
-/* Updated User Controls */
+
 .user-controls {
     display: flex;
     align-items: center;
@@ -865,22 +864,22 @@ input[type="time"] {
 .user-controls span {
     font-weight: 600;
     color: #6c6d56;
-    order: 1; /* Makes username appear before settings */
+    order: 1; 
 }
 
 .user-controls a[href*="usersettings"] {
-    order: 2; /* Puts settings icon last */
+    order: 2; 
     margin-left: 10px;
 }
 
 .user-controls a:not([href*="usersettings"]) {
-    order: 3; /* Puts logout button last */
+    order: 3; 
 }
 
-/* Adjust dashboard header */
+
 .dashboard-header {
-    position: relative; /* Needed for absolute positioning of user controls */
-    padding-top: 60px; /* Make space for user controls */
+    position: relative; 
+    padding-top: 60px; 
     padding-bottom: 20px;
     margin-bottom: 30px;
     border-bottom: 2px solid #6c6d56;
@@ -898,7 +897,7 @@ input[type="time"] {
     }
 } 
 
-/* Add to your styles.css */
+
 select:focus, select:active {
     border-color: var(--primary-color);
     box-shadow: 0 0 0 2px rgba(108, 109, 86, 0.2);
@@ -909,5 +908,5 @@ select:focus, select:active {
     padding: 20px;
     font-size: 1.2rem;
     color: var(--primary-color);
-    display: none; /* Hidden by default */
+    display: none; 
 }
