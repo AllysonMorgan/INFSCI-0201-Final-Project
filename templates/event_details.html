@@ -61,6 +61,11 @@
         }
         .input_box{
             margin-bottom:15px;
+            display:inline-block;
+            border: 2px solid #6c6d56;
+            border-radius: 30px;
+            padding:10px;
+            color:#6c6d56
         }
 
         .input_box input{
@@ -92,14 +97,14 @@
         <header class="dashboard-header">
             <div>
                 {% if session.is_manager %}
-    <a href="{{ url_for('manager_dashboard') }}" class="button" style="margin-right: 15px;">
-        <i class='bx bx-arrow-back'></i> Back
-    </a>
-{% else %}
-    <a href="{{ url_for('home') }}" class="button" style="margin-right: 15px;">
-        <i class='bx bx-arrow-back'></i> Back
-    </a>
-{% endif %}
+                    <a href="{{ url_for('manager_dashboard') }}" class="button" style="margin-right: 15px;">
+                    <i class='bx bx-arrow-back'></i> Back
+                    </a>
+                {% else %}
+                    <a href="{{ url_for('home') }}" class="button" style="margin-right: 15px;">
+                    <i class='bx bx-arrow-back'></i> Back
+                    </a>
+                {% endif %}
                 <div class="event-header">
                     <h1>{{ event.title }}</h1>
                     <span class="event-type-badge {{ event.event_type }}">
@@ -146,20 +151,14 @@
             <div id="map" style="height: 400px; margin-top: 20px;"></div>
             <script>
                 function initMap() {
-                    // Check if latitude and longitude are valid
                     const lat = {{ latitude if latitude is not none else 'null' }};
                     const lng = {{ longitude if longitude is not none else 'null' }};
             
-                    // If lat or lng is null, you can set a default location or handle the error
                     const eventLocation = { lat: lat, lng: lng };
-            
-                    // Create the map
                     const map = new google.maps.Map(document.getElementById("map"), {
                         zoom: 15,
                         center: eventLocation,
                     });
-            
-                    // Only create a marker if lat and lng are valid
                     if (lat !== null && lng !== null) {
                         const marker = new google.maps.Marker({
                             position: eventLocation,
@@ -180,13 +179,18 @@
             <div>
                 {% if not is_registered %}
                 <form method="POST" action="{{ url_for('register_for_event', event_id=event.id) }}">
-                    <div class="input_box">
+                    <div>
                         <label for="num_attendees">Number of people attending (including yourself):</label>
-                        <input type="number" id="num_attendees" name="num_attendees" min="1" value="1" required>
+                        <input  class="input_box" type="number" id="num_attendees" name="num_attendees" min="1" value="1" required>
                     </div>
                     <button type="submit" class="button">
                         <i class='bx bx-user-plus'></i> Register
                     </button>
+                    <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text={{ event.title|urlencode }}&dates={{ start_time|urlencode }}/{{ end_time|urlencode }}&details={{ event.description|urlencode }}&location={{ event.location|urlencode }}" 
+       class="button" target="_blank">
+        <i class='bx bx-calendar-plus'></i> Add to Google Calendar
+    </a>
+                    
                 </form>
                 {% else %}
                 <form method="POST" action="{{ url_for('unregister_from_event', event_id=event.id) }}" 

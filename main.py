@@ -75,6 +75,20 @@ class Event(db.Model):
         )
         return total if total else 0
 
+    def get_google_calendar_start_time(self):
+        event_datetime_str = f"{self.date} {self.time}"
+        event_datetime = datetime.strptime(event_datetime_str, '%Y-%m-%d %H:%M')
+        
+        return event_datetime.strftime('%Y%m%dT%H%M%SZ') 
+
+    def get_google_calendar_end_time(self, duration_hours=2):
+        event_datetime_str = f"{self.date} {self.time}"
+        event_datetime = datetime.strptime(event_datetime_str, '%Y-%m-%d %H:%M')
+        
+        end_datetime = event_datetime + timedelta(hours=duration_hours)
+        
+        return end_datetime.strftime('%Y%m%dT%H%M%SZ')
+    
 # Initialize Database
 with app.app_context():
     db.create_all()
@@ -408,12 +422,14 @@ def event_details(event_id):
     else:
         latitude = None
         longitude = None
-
+    start_time = event.get_google_calendar_start_time()
+    end_time = event.get_google_calendar_end_time()
     return render_template('event_details.html', 
                          event=event,
                          is_registered=is_registered,
                          total_attendees=event.total_attendees,
-                         latitude=latitude, longitude=longitude) 
+                         latitude=latitude, longitude=longitude,
+                         start_time=start_time, end_time=end_time) 
 
 @app.route('/register_for_event/<int:event_id>', methods=['POST'])
 def register_for_event(event_id):
@@ -454,7 +470,6 @@ def register_for_event(event_id):
         )
         db.session.commit()
         
-        # Get updated attendees count
         total_attendees = event.total_attendees
         
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -489,7 +504,6 @@ def unregister_from_event(event_id):
         )
         db.session.commit()
         
-        # Get updated attendees count
         total_attendees = event.total_attendees
         
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':

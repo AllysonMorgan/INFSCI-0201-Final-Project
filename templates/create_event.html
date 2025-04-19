@@ -9,9 +9,9 @@
             max-width: 700px;
             margin: 30px auto;
             padding: 30px;
-            background: white;
+            background: #e8e8cf;
             border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            border: 2px solid #6c6d56;
         }
         
         .create-event-title {
@@ -23,7 +23,7 @@
         }
         
         .form-section {
-            margin-bottom: 22px; /* Consistent spacing */
+            margin-bottom: 22px; 
         }
         
         .section-title {
@@ -35,7 +35,6 @@
             padding-left: 8px;
         }
         
-        /* Restored green oval styling */
         .oval-input {
             width: 100%;
             padding: 14px 20px;
@@ -43,7 +42,7 @@
             border-radius: 30px;
             font-size: 1rem;
             color: #6c6d56;
-            background: transparent;
+            background: white;
             outline: none;
             transition: border-color 0.3s;
         }
@@ -60,7 +59,7 @@
             border-radius: 20px;
             font-size: 1rem;
             color: #6c6d56;
-            background: transparent;
+            background: white;
             outline: none;
             resize: vertical;
             transition: border-color 0.3s;
@@ -73,7 +72,7 @@
             border-radius: 30px;
             font-size: 1rem;
             color: #6c6d56;
-            background: transparent;
+            background: white;
             appearance: none;
             background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236c6d56'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
             background-repeat: no-repeat;
@@ -89,7 +88,10 @@
         .date-time-group {
             flex: 1;
         }
-        
+        .date-time-group input{
+            border: 2px solid #6c6d56;
+            border-radius:30px
+        }
         .form-actions {
             display: flex;
             justify-content: center;
@@ -99,9 +101,9 @@
         
         .create-btn {
             padding: 14px 30px;
-            background: #6c6d56;
-            color: white;
-            border: none;
+            background:#f0f0e0;
+            color: #6c6d56;
+            border: 2px solid #6c6d56;
             border-radius: 30px;
             font-size: 1.1rem;
             font-weight: 600;
@@ -111,14 +113,24 @@
         
         .cancel-btn {
             padding: 14px 30px;
-            background: #f0f0e0;
-            color: #6c6d56;
-            border: 2px solid #6c6d56;
+            background-color: #f8d7da;
+            color: #721c24;
+            border-color: #f5c6cb;
+            border: 2px solid;
             border-radius: 30px;
             font-size: 1.1rem;
             font-weight: 600;
             text-decoration: none;
             transition: all 0.3s;
+        }
+
+        .cancel-btn:hover{
+            background-color: #f1b0b7;
+            border-color:#721c24
+        }
+
+        .create-btn:hover {
+            background: #c2c2ac
         }
         
         @media (max-width: 768px) {

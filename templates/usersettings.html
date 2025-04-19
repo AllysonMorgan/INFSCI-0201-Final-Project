@@ -4,71 +4,103 @@
     <meta charset="UTF-8">
     <title>User Settings</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Charm:wght@400;700&family=Winky+Sans:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
     <style>
-        .form-wrapper {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
-            max-width: 400px;
-            margin: 0 auto;
+        .profile-settings-container {
+            max-width: 700px; 
+            margin: 30px auto;
+            padding: 30px; 
+            background: #e8e8cf; 
+            border-radius: 15px;
+            border: 2px solid #6c6d56; 
         }
-
+    
+        .profile-settings-title {
+            text-align: center; 
+            margin-bottom: 30px; 
+            color: #6c6d56;
+            font-family: "Winky Sans", sans-serif; 
+            font-size: 2.5rem; 
+        }
+    
+        .form-section {
+            margin-bottom: 22px; 
+        }
+    
+        .section-title {
+            display: block;
+            margin-bottom: 12px;
+            font-weight: 600;
+            color: #6c6d56;
+            font-size: 1.1rem;
+            padding-left: 8px;
+        }
+    
+        /* Form input styling */
         .form-wrapper input {
             width: 100%;
             padding: 10px 15px;
-            border-radius: 12px;
-            border: 1px solid #ccc;
+            border: 2px solid #6c6d56;
+            border-radius: 30px;
             font-size: 16px;
         }
-
-        .form-wrapper .button {
+    
+        .button {
             width: 100%;
             padding: 10px;
-            border-radius: 12px;
+            border-radius: 30px;
             font-size: 16px;
+            background: #f0f0e0; 
+            border: 2px solid #6c6d56; 
+            color: #6c6d56; 
         }
-
-        .back-link {
-            display: inline-flex;
-            align-items: center;
-            margin-top: 20px;
+        .back-button{
+            padding: 10px;
+            margin-top:10px;
+            border-radius: 30px;
+            display:inline-block;
             font-size: 16px;
-            text-decoration: none;
-            color: #333;
-            font-weight: 500;
+            text-decoration: None;
+            background: #f0f0e0; 
+            border: 2px solid #6c6d56; 
+            color: #6c6d56;
         }
-
-        .back-link:hover {
-            text-decoration: underline;
-        }
-
-        .back-link svg {
-            margin-right: 5px;
+        .back-button:hover{
+            background-color: #c2c2ac;
         }
     </style>
-</head>
-<body>
-    <div class="dashboard-container">
-        <h1>Profile Settings</h1>
-        <p style="margin-bottom: 20px;">You can change your username and password below.</p>
-        
-        <form method="POST" class="form-wrapper">
-            <input type="text" name="username" placeholder="Username" value="{{ username }}" required>
-            <input type="text" name="password" placeholder="Password" value="{{ password }}" required>
-            <button type="submit" class="button">Update</button>
-        </form>
-
-        <a href="{{ url_for('home') }}" class="back-link">
-            <!-- Left Arrow SVG -->
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                <path fill-rule="evenodd" d="M15 8a.5.5 0 0 1-.5.5H2.707l3.147 3.146a.5.5 0 0 1-.708.708l-4-4a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 7.5H14.5a.5.5 0 0 1 .5.5z"/>
-            </svg>
-            Back
-        </a>
-    </div>
-</body>
+    </head>
+    <body>
+        <div class="dashboard-container">
+            <div class="profile-settings-container">
+                <h1 class="profile-settings-title">Profile Settings</h1>
+                <p style="margin-bottom: 20px;">You can change your username and password below.</p>
+                
+                <form method="POST" class="form-wrapper">
+                    <div class="form-section">
+                        <span class="section-title">Username</span>
+                        <input type="text" name="username" placeholder="Username" value="{{ username }}" required>
+                    </div>
+                    <div class="form-section">
+                        <span class="section-title">Password</span>
+                        <input type="password" name="password" placeholder="Password" value="{{ password }}" required>
+                    </div>
+                    <button type="submit" class="button">Update</button>
+                </form>
+    
+                {% if session.is_manager %}
+                    <a href="{{ url_for('manager_dashboard') }}" class="back-button">
+                        <i class='bx bx-arrow-back'></i> Back
+                    </a>
+                {% else %}
+                    <a href="{{ url_for('home') }}" class="back-button">
+                        <i class='bx bx-arrow-back'></i> Back
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </body>
 </html>

@@ -74,6 +74,10 @@ h1, h2, h3 {
     width: 100%;
     height: 50px;
     margin: 25px 0;
+    border: 1.5px solid #6c6d56;
+    border-radius: 30px;
+    background: transparent;
+    outline: none;
 }
 .event_input_box{
     position: relative;
@@ -92,7 +96,7 @@ h1, h2, h3 {
     height: 100%;
     background: transparent;
     outline: none;
-    border: 2px solid #6c6d56;
+    border: 1px solid #6c6d56;
     border-radius: 30px;
     font-size: 16px;
     color: #6c6d56;
@@ -110,6 +114,7 @@ h1, h2, h3 {
     color: #6c6d56;
     padding: 10px 10px 10px 10px;
     margin:0px 10px 10px 0px
+    
 }
 
 .input_box input::placeholder {
@@ -440,7 +445,16 @@ footer {
     font-weight:600;
     color:#6c6d56
 }
-
+.bigbutton:hover{
+    width: 100%;
+    height:45px;
+    background:#c2c2ac;
+    border:2px solid #6c6d56;
+    outline:none;
+    border-radius:30px;
+    cursor:pointer;
+    color:#6c6d56
+}
 .event-actions form {
     margin: 15px 0;
     display: flex;
@@ -516,7 +530,6 @@ footer {
     resize: vertical;
 }
 
-.input_box input,
 .input_box select,
 .input_box textarea {
     width: 100%;
@@ -669,15 +682,6 @@ input[type="time"] {
     margin-bottom: 15px;
 }
 
-.input_box input,
-.input_box select,
-.input_box textarea {
-    width: 100%;
-    padding: 12px 15px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    font-size: 1rem;
-}
 
 .input_box textarea {
     min-height: 150px;
@@ -812,7 +816,6 @@ input[type="time"] {
     gap: 25px;  /* Increased gap between buttons */
     margin-top: 0;  /* Remove any top margin */
     padding-top: 20px;
-    border-top: 1px solid #e0e0d0;
 }
 
 .submit-button, 
