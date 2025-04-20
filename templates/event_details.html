@@ -82,6 +82,7 @@
         .button {
             display: inline-block;
             margin-top: 20px;
+            margin-right:12px
         }
         @media (max-width: 768px) {
             .event-actions {
@@ -190,7 +191,10 @@
        class="button" target="_blank">
         <i class='bx bx-calendar-plus'></i> Add to Google Calendar
     </a>
-                    
+    <a href="data:text/calendar;charset=utf-8,BEGIN:VCALENDAR%0AVERSION:2.0%0ABEGIN:VEVENT%0AUID:{{ event.id }}%0ASUMMARY:{{ event.title|urlencode }}%0ADTSTART:{{ start_time|urlencode }}%0ADTEND:{{ end_time|urlencode }}%0ADESCRIPTION:{{ event.description|urlencode }}%0ALOCATION:{{ event.location|urlencode }}%0AEND:VEVENT%0AEND:VCALENDAR" 
+    class="button" download="{{ event.title|urlencode }}.ics">
+    <i class='bx bx-download'></i> Download Event
+ </a>
                 </form>
                 {% else %}
                 <form method="POST" action="{{ url_for('unregister_from_event', event_id=event.id) }}" 
@@ -198,7 +202,16 @@
                     <button type="submit" class="button danger">
                         <i class='bx bx-user-x'></i> Unregister
                     </button>
+                    <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text={{ event.title|urlencode }}&dates={{ start_time|urlencode }}/{{ end_time|urlencode }}&details={{ event.description|urlencode }}&location={{ event.location|urlencode }}" 
+                    class="button" target="_blank">
+                    <i class='bx bx-calendar-plus'></i> Add to Google Calendar
+                    </a>
+                    <a href="data:text/calendar;charset=utf-8,BEGIN:VCALENDAR%0AVERSION:2.0%0ABEGIN:VEVENT%0AUID:{{ event.id }}%0ASUMMARY:{{ event.title|urlencode }}%0ADTSTART:{{ start_time|urlencode }}%0ADTEND:{{ end_time|urlencode }}%0ADESCRIPTION:{{ event.description|urlencode }}%0ALOCATION:{{ event.location|urlencode }}%0AEND:VEVENT%0AEND:VCALENDAR" 
+       class="button" download="{{ event.title|urlencode }}.ics">
+       <i class='bx bx-download'></i> Download Event
+    </a>
                 </form>
+                
                 {% endif %}
             </div>
         </div>
