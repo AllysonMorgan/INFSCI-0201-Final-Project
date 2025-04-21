@@ -39,9 +39,13 @@
         }
         .manager-actions {
             display: flex;
-            gap: 10px;
+            gap: 6px;
             margin-top: 15px;
         }
+        .manager-actions .button {
+            font-size:15px
+        }
+        
         .no-events-message {
             text-align: center;
             padding: 40px;
@@ -131,6 +135,7 @@
                 <a href="{{ url_for('usersettings') }}" title="Settings"><i class='bx bxs-cog'></i></a>
                 <a href="{{ url_for('manager_profile') }}" class="button">My Profile</a>               
                 <a href="{{ url_for('create_event') }}" class="button">Create Event</a>
+                <a href="{{ url_for('past_events') }}" class="button">Archived Events</a>
                 <a href="{{ url_for('logout') }}" class="button">Logout</a>
             </div>
         </header>
@@ -182,7 +187,7 @@
                         <div class="event-card" 
                              data-event-type="{{ event.event_type }}" 
                              data-event-date="{{ event.date }}"
-                             data-event-time="{{ event.start_time }}"
+                             data-event-time="{{ event.time }}"
                              data-event-title="{{ event.title.lower() }}"
                              data-event-description="{{ event.description.lower() }}">
                             <div class="event-image" style="background-image: url('/static/default-event.jpg');">
@@ -197,8 +202,7 @@
                                         {{ event.event_type|capitalize }}
                                     </span>
                                 </div>
-                                <p><i class='bx bx-calendar'></i> {{ event.date }}</p>
-                                <p><i class='bx bx-time'></i> {{ event.start_time }}{% if event.end_time %} - {{ event.end_time }}{% endif %}</p>
+                                <p><i class='bx bx-calendar'></i> {{ event.date }} at {{ event.time }}</p>
                                 <p><i class='bx bx-map'></i> {{ event.location }}</p>
                                 <p class="event-description">{{ event.description[:100] }}{% if event.description|length > 100 %}...{% endif %}</p>
                                 <div class="manager-actions">
@@ -208,11 +212,15 @@
                                     <a href="{{ url_for('edit_event', event_id=event.id) }}" class="button">
                                         <i class='bx bxs-edit-alt'></i> Edit
                                     </a>
+                                    <a href="{{ url_for('view_attendees', event_id=event.id) }}" class="button">
+                                        <i class='bx bx-group'></i> View Attendees
+                                    </a>
                                     <form method="POST" action="{{ url_for('delete_event', event_id=event.id) }}" onsubmit="return confirm('Are you sure you want to delete this event?');">
                                         <button type="submit" class="button danger">
                                             <i class='bx bxs-trash'></i> Delete
                                         </button>
                                     </form>
+                                    
                                 </div>
                             </div>
                         </div>
@@ -238,7 +246,7 @@
                         <div class="event-card" 
                              data-event-type="{{ event.event_type }}" 
                              data-event-date="{{ event.date }}"
-                             data-event-time="{{ event.start_time }}"
+                             data-event-time="{{ event.time }}"
                              data-event-title="{{ event.title.lower() }}"
                              data-event-description="{{ event.description.lower() }}">
                             <div class="event-image" style="background-image: url('/static/default-event.jpg');">
@@ -253,8 +261,7 @@
                                         {{ event.event_type|capitalize }}
                                     </span>
                                 </div>
-                                <p><i class='bx bx-calendar'></i> {{ event.date }}</p>
-                                <p><i class='bx bx-time'></i> {{ event.start_time }}{% if event.end_time %} - {{ event.end_time }}{% endif %}</p>
+                                <p><i class='bx bx-calendar'></i> {{ event.date }} at {{ event.time }}</p>
                                 <p><i class='bx bx-map'></i> {{ event.location }}</p>
                                 <p class="event-description">{{ event.description[:100] }}{% if event.description|length > 100 %}...{% endif %}</p>
                                 <div class="manager-actions">
@@ -317,9 +324,9 @@
                     const typeMatch = selectedType === '' || eventType === selectedType;
                     const dateMatch = selectedDate === '' || eventDate === selectedDate;
                     const timeMatch = selectedTime === '' || 
-                                     (selectedTime === 'morning' && eventTime >= '08:00' && eventTime < '12:00') ||
-                                     (selectedTime === 'afternoon' && eventTime >= '12:00' && eventTime < '17:00') ||
-                                     (selectedTime === 'evening' && eventTime >= '17:00' && eventTime <= '21:00');
+                                      (selectedTime === 'morning' && eventTime >= '08:00' && eventTime < '12:00') ||
+                                      (selectedTime === 'afternoon' && eventTime >= '12:00' && eventTime < '17:00') ||
+                                      (selectedTime === 'evening' && eventTime >= '17:00' && eventTime <= '21:00');
                     const searchMatch = searchTerm === '' || 
                                        eventTitle.includes(searchTerm) || 
                                        eventDescription.includes(searchTerm);
@@ -343,9 +350,9 @@
                     const typeMatch = selectedType === '' || eventType === selectedType;
                     const dateMatch = selectedDate === '' || eventDate === selectedDate;
                     const timeMatch = selectedTime === '' || 
-                                     (selectedTime === 'morning' && eventTime >= '08:00' && eventTime < '12:00') ||
-                                     (selectedTime === 'afternoon' && eventTime >= '12:00' && eventTime < '17:00') ||
-                                     (selectedTime === 'evening' && eventTime >= '17:00' && eventTime <= '21:00');
+                                      (selectedTime === 'morning' && eventTime >= '08:00' && eventTime < '12:00') ||
+                                      (selectedTime === 'afternoon' && eventTime >= '12:00' && eventTime < '17:00') ||
+                                      (selectedTime === 'evening' && eventTime >= '17:00' && eventTime <= '21:00');
                     const searchMatch = searchTerm === '' || 
                                        eventTitle.includes(searchTerm) || 
                                        eventDescription.includes(searchTerm);

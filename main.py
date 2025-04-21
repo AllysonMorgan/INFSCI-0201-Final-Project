@@ -1,19 +1,16 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import timedelta, datetime, date
+from datetime import timedelta, datetime
 import os
 from sqlalchemy import func, select, and_
 from flask_migrate import Migrate
 from geopy.geocoders import Nominatim
-from flask_wtf.csrf import CSRFProtect
-from flask_wtf.csrf import CSRFError
+import pytz
 
 # Initialize Flask app
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY') or os.urandom(24)
-app.config['SECRET_KEY'] = 'your-secret-key-here'  # Replace with a real secret key
-csrf = CSRFProtect(app)
 app.permanent_session_lifetime = timedelta(days=30)
 
 # Database configuration
@@ -57,10 +54,8 @@ class Event(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text, nullable=False)
-    date = db.Column(db.Date)
-    time = db.Column(db.Time)
-    start_time = db.Column(db.Time)
-    end_time = db.Column(db.Time)
+    date = db.Column(db.String(20), nullable=False)
+    time = db.Column(db.String(20), nullable=False)
     location = db.Column(db.String(120), nullable=False)
     event_type = db.Column(db.String(20), nullable=False, default='other')  # New field
     manager_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -81,15 +76,40 @@ class Event(db.Model):
         )
         return total if total else 0
 
-    def get_google_calendar_start_time(self):
-        return datetime.combine(self.date, self.start_time)
+    def get_google_calendar_start_time(self, local_tz='America/New_York'):
+        event_datetime_str = f"{self.date} {self.time}"
+        local_tz = pytz.timezone(local_tz)
+        event_datetime = datetime.strptime(event_datetime_str, '%Y-%m-%d %H:%M')
+        
+        localized_event_datetime = local_tz.localize(event_datetime)
+        event_datetime_utc = localized_event_datetime.astimezone(pytz.utc)
+        
+        return event_datetime_utc.strftime('%Y%m%dT%H%M%SZ') 
 
-    def get_google_calendar_end_time(self):
-        return datetime.combine(self.date, self.end_time)
+    def get_google_calendar_end_time(self, duration_hours=2, local_tz='America/New_York'):
+        event_datetime_str = f"{self.date} {self.time}"
+        local_tz = pytz.timezone(local_tz)
+        event_datetime = datetime.strptime(event_datetime_str, '%Y-%m-%d %H:%M')
+        
+        localized_event_datetime = local_tz.localize(event_datetime)
+        event_datetime_utc = localized_event_datetime.astimezone(pytz.utc)
+        
+        end_datetime_utc = event_datetime_utc + timedelta(hours=duration_hours)
+        
+        return end_datetime_utc.strftime('%Y%m%dT%H%M%SZ')
     
-    def time(self):
-        return self.start_time
+    def is_past_event(self):
+        event_datetime = datetime.strptime(f"{self.date} {self.time}", '%Y-%m-%d %H:%M')
+        return event_datetime < datetime.now()
     
+class Attendee(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    event_id = db.Column(db.Integer, db.ForeignKey('event.id'), nullable=False)
+    username = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(100), nullable=False)
+
+    event = db.relationship('Event', backref='event_attendees')
+
 # Initialize Database
 with app.app_context():
     db.create_all()
@@ -122,12 +142,30 @@ def home():
     registered_events = user.registered_events if user else []
     all_events = Event.query.order_by(Event.date.asc()).all()
     
-    # Filter out registered events from all events
-    upcoming_events = [event for event in all_events if event not in registered_events]
-    
+    if user.role == 'user':
+        upcoming_events = [event for event in all_events if not event.is_past_event()]
+    else:
+        upcoming_events = all_events
+
     return render_template('landing.html', 
-                         events=upcoming_events,
-                         registered_events=registered_events)
+                           events=upcoming_events,
+                           registered_events=registered_events)
+
+@app.route('/manager/past_events')
+def past_events():
+    if 'user_id' not in session:
+        return redirect(url_for('managerlogin'))
+
+    user = User.query.get(session['user_id'])
+    
+    if user.role != 'manager':
+        flash('Unauthorized access', 'danger')
+        return redirect(url_for('home'))
+
+    # Get past events for the manager
+    past_events = Event.query.filter(Event.date < datetime.now().strftime('%Y-%m-%d')).order_by(Event.date.desc()).all()
+
+    return render_template('past_events.html', past_events=past_events)
 
 @app.route('/manager_dashboard')
 def manager_dashboard():
@@ -138,10 +176,11 @@ def manager_dashboard():
 
     # Events created by the current manager
     your_events = Event.query.filter_by(manager_id=user.id).all()
-
+    your_events = [event for event in your_events if not event.is_past_event()]
     # Events created by other managers
     other_events = Event.query.filter(Event.manager_id != user.id).all()
-
+    other_events = [event for event in other_events if not event.is_past_event()]
+    
     return render_template(
         'manager_landing.html',
         username=user.username,
@@ -149,18 +188,10 @@ def manager_dashboard():
         other_events=other_events
     )
 
-@app.errorhandler(CSRFError)
-def handle_csrf_error(e):
-    flash('The form you submitted has expired. Please try again.', 'danger')
-    return redirect(request.referrer or url_for('home'))
 
 @app.route('/userlogin', methods=['GET', 'POST'])
 def userlogin():
     if request.method == 'POST':
-        if not validate_csrf():
-            flash('Invalid CSRF token', 'danger')
-            return redirect(url_for('userlogin'))
-        
         username = request.form['username']
         password = request.form['password']
         remember = request.form.get('remember')
@@ -337,43 +368,24 @@ def create_event():
 
     if request.method == 'POST':
         try:
-            # Add debug print to see if form data is received
-            print("Form data received:", request.form)
-            
             manager = User.query.filter_by(username=session['username']).first()
-            if not manager:
-                flash('Manager account not found', 'danger')
-                return redirect(url_for('create_event'))
-            
-            # Validate required fields
-            required_fields = ['title', 'description', 'date', 'start_time', 'location', 'event_type']
-            for field in required_fields:
-                if not request.form.get(field):
-                    flash(f'{field.replace("_", " ").title()} is required', 'danger')
-                    return redirect(url_for('create_event'))
             
             new_event = Event(
                 title=request.form['title'],
                 description=request.form['description'],
                 date=request.form['date'],
-                start_time=request.form['start_time'],
-                end_time=request.form.get('end_time'),  # Optional
+                time=request.form['time'],
                 location=request.form['location'],
-                event_type=request.form['event_type'],
+                event_type=request.form['event_type'], 
                 manager_id=manager.id
             )
-            
             db.session.add(new_event)
             db.session.commit()
-            
             flash('Event created successfully!', 'success')
             return redirect(url_for('manager_dashboard'))
-            
         except Exception as e:
             db.session.rollback()
-            print("Error creating event:", str(e))  
             flash(f'Error creating event: {str(e)}', 'danger')
-            return redirect(url_for('create_event'))
     
     return render_template('create_event.html')
 
@@ -392,32 +404,17 @@ def edit_event(event_id):
 
     if request.method == 'POST':
         try:
-            event.title = request.form.get('title', event.title) 
-            event.description = request.form.get('description', event.description)
-            
-            if 'date' in request.form:
-                event.date = datetime.strptime(request.form['date'], '%Y-%m-%d').date()
-            
-            if 'start_time' in request.form and request.form['start_time']:
-                event.start_time = datetime.strptime(request.form['start_time'], '%H:%M').time()
-            
-            if 'end_time' in request.form and request.form['end_time']:
-                event.end_time = datetime.strptime(request.form['end_time'], '%H:%M').time()
-            else:
-                event.end_time = None
-            
-            event.location = request.form.get('location', event.location)
-            
+            event.title = request.form['title']
+            event.description = request.form['description']
+            event.date = request.form['date']
+            event.time = request.form['time']
+            event.location = request.form['location']
             db.session.commit()
             flash('Event updated successfully!', 'success')
             return redirect(url_for('manager_dashboard'))
-        except ValueError as e:
-            db.session.rollback()
-            flash(f'Invalid date/time format: {str(e)}', 'danger')
         except Exception as e:
             db.session.rollback()
             flash(f'Error updating event: {str(e)}', 'danger')
-            app.logger.error(f"Error updating event {event_id}: {str(e)}")
     
     return render_template('edit_event.html', event=event)
 
@@ -484,6 +481,10 @@ def register_for_event(event_id):
     event = Event.query.get_or_404(event_id)
     user = User.query.filter_by(username=session['username']).first()
     
+    if event.is_past_event():
+        flash('You cannot register for a past event.', 'danger')
+        return redirect(url_for('event_details', event_id=event.id))
+    
     existing_reg = db.session.execute(
         select(registrations)
         .where(registrations.c.user_id == user.id)
@@ -528,6 +529,12 @@ def register_for_event(event_id):
         flash(f'Registration failed: {str(e)}', 'danger')
     
     return redirect(url_for('event_details', event_id=event.id))
+
+@app.route('/event/<int:event_id>/attendees')
+def view_attendees(event_id):
+    event = Event.query.get_or_404(event_id)  # Get the event or return 404 if not found
+    attendees = event.attendees  # Get the list of attendees for the event
+    return render_template('attendees.html', event=event, attendees=attendees)
 
 @app.route('/unregister_from_event/<int:event_id>', methods=['POST'])
 def unregister_from_event(event_id):

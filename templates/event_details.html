@@ -99,7 +99,7 @@
         <header class="dashboard-header">
             <div>
                 {% if session.is_manager %}
-                    <a href="{{ url_for('manager_dashboard') }}" class="button" style="margin-right: 15px;">
+                    <a href="javascript:history.back()" class="button" style="margin-right: 15px;">
                     <i class='bx bx-arrow-back'></i> Back
                     </a>
                 {% else %}
@@ -139,11 +139,7 @@
             <div class="event-meta">
                 <div class="event-meta-item">
                     <i class='bx bx-calendar'></i>
-                    <span>{{ event.date }}</span>
-                </div>
-                <div class="event-meta-item">
-                    <i class='bx bx-time'></i>
-                    <span>{{ event.start_time }}{% if event.end_time %} - {{ event.end_time }}{% endif %}</span>
+                    <span>{{ event.date }} at {{ event.time }}</span>
                 </div>
                 <div class="event-meta-item">
                     <i class='bx bx-map'></i>

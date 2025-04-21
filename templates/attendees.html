@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendees for {{ event.title }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Charm:wght@400;700&family=Wix+Madefor+Display:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+            .users-container{
+            background: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 15px;
+            border: 2px solid #6c6d56;
+            margin-top: 20px;
+            font-family: 'Winky Sans', sans-serif;
+            }
+            table th{
+                font-size:21px;
+                border-bottom: 2px solid #6c6d56;
+                padding: 10px 10px 10px 30px;
+
+
+            }
+            table td{
+                border-bottom: 1px solid #6c6d56;
+                padding: 10px 10px 10px 30px;
+                font-size:18px
+
+            }
+            table {
+                margin-bottom:10px;
+                margin-top:10px;
+                text-align:left;
+                border-collapse: separate; 
+                border-spacing: 0;
+            }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+    <h1>Registered Users for {{ event.title }}</h1>
+    <div class="users-container">
+    <table>
+        <thead>
+            <tr>
+                <th>Username:</th>
+                <th>Email:</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for attendee in attendees %}
+            <tr>
+                <td>{{ attendee.username }}</td>
+                <td>{{ attendee.email }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="2">No attendees registered for this event.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{{ url_for('manager_dashboard') }}" class="button">Back to Events</a>
+    </div>
+    
+</div>
+</body>
+</html>

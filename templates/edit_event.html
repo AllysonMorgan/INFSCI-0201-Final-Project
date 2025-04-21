@@ -7,7 +7,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Charm:wght@400;700&family=Winky+Sans:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
-    <style>
+</head>
+<style>
         .edit-event-container{
             max-width: 700px;
             margin: 30px auto;
@@ -56,135 +57,63 @@
             outline: none;
             transition: border-color 0.3s;
         }
-        .time-select-container {
-            display: flex;
-            gap: 20px;
-        }
-        .time-select-group {
-            flex: 1;
-        }
-        .oval-select {
-            width: 100%;
-            padding: 14px 20px;
+        input[type="date"] {
             border: 2px solid #6c6d56;
             border-radius: 30px;
-            font-size: 1rem;
-            color: #6c6d56;
-            background: white;
-            appearance: none;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236c6d56'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right 15px center;
-            background-size: 20px;
+        } 
+        input[type="time"] {
+            border: 2px solid #6c6d56;
+            border-radius: 30px;
         }
-        .alert {
-            padding: 15px;
-            margin-bottom: 20px;
-            border: 1px solid transparent;
-            border-radius: 4px;
-        }
-        .alert-danger {
-            color: #721c24;
-            background-color: #f8d7da;
-            border-color: #f5c6cb;
-        }
-        .alert-success {
-            color: #155724;
-            background-color: #d4edda;
-            border-color: #c3e6cb;
-        }
-        @media (max-width: 768px) {
-            .time-select-container {
-                flex-direction: column;
-                gap: 15px;
-            }
-        }
-    </style>
-</head>
+</style>
 <body>
     <div class="dashboard-container">
         <h1>Edit Event</h1>
         <div class="edit-event-container">
-            <!-- Flash Messages -->
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                        <div class="alert alert-{{ category }}">{{ message }}</div>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
-
-            <form method="POST" action="{{ url_for('edit_event', event_id=event.id) }}" class="event-form">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                
-                <div class="form-group">
+        <form method="POST" class="event-form">
+            <div class="form-group">
+                <div>
+                    Title
+                    <input class="input_box" type="text" class="event_input_box" name="title" value="{{ event.title }}" required>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <div>
+                    Description
+                    <textarea class="event_input_box form-textarea" name="description" required>{{ event.description }}</textarea>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group half-width">
                     <div>
-                        Title
-                        <input class="input_box" type="text" name="title" value="{{ event.title }}" required>
+                        <label>Date</label>
+                        <input  class="input_box" type="date" name="date" value="{{ event.date }}" required>
                     </div>
                 </div>
                 
-                <div class="form-group">
+                <div class="form-group half-width">
                     <div>
-                        Description
-                        <textarea class="event_input_box form-textarea" name="description" required>{{ event.description }}</textarea>
+                        <label>Time</label>
+                        <input  class="input_box" type="time" name="time" value="{{ event.time }}" required>
                     </div>
                 </div>
-                
-                <div class="form-row">
-                    <div class="form-group half-width">
-                        <div>
-                            <label>Date</label>
-                            <input class="input_box" type="date" name="date" value="{{ event.date.strftime('%Y-%m-%d') if event.date else '' }}" required>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group time-select-container">
-                        <div class="time-select-group">
-                            <label>Start Time</label>
-                            <select name="start_time" class="oval-select" required>
-                                {% for hour in range(8, 21) %}
-                                    {% for minute in ['00', '30'] %}
-                                        {% set time_str = '%02d:%s' % (hour, minute) %}
-                                        <option value="{{ time_str }}" 
-                                                {% if event.start_time and event.start_time.strftime('%H:%M') == time_str %}selected{% endif %}>
-                                            {{ time_str }}
-                                        </option>
-                                    {% endfor %}
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="time-select-group">
-                            <label>End Time (Optional)</label>
-                            <select name="end_time" class="oval-select">
-                                <option value="">No End Time</option>
-                                {% for hour in range(8, 22) %}
-                                    {% for minute in ['00', '30'] %}
-                                        {% set time_str = '%02d:%s' % (hour, minute) %}
-                                        <option value="{{ time_str }}" 
-                                                {% if event.end_time and event.end_time.strftime('%H:%M') == time_str %}selected{% endif %}>
-                                            {{ time_str }}
-                                        </option>
-                                    {% endfor %}
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </div>
+            </div>
+            
+            <div class="form-group">
+                <div>
+                    Location
+                    <input class="input_box" type="text" class="event_input_box" name="location" value="{{ event.location }}" required>
                 </div>
-                
-                <div class="form-group">
-                    <div>
-                        Location
-                        <input class="input_box" type="text" name="location" value="{{ event.location }}" required>
-                    </div>
-                </div>
-                
-                <div class="form-actions">
-                    <button type="submit" class="button">Update Event</button>
-                    <a href="{{ url_for('manager_dashboard') }}" class="cancel-btn">Cancel</a>
-                </div>
-            </form>
-        </div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="button">Update Event</button>
+                <a href="{{ url_for('home') }}" class="cancel-btn">Cancel</a>
+            </div>
+        </form>
     </div>
+</div>
 </body>
 </html>

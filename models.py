@@ -53,8 +53,6 @@ class Event(db.Model):
     location = db.Column(db.String(120), nullable=False)
     manager_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    start_time = db.Column(db.String(20), nullable=False)  # Store as "HH:MM" format
-    end_time = db.Column(db.String(20), nullable=True)
     
     @property
     def total_attendees(self):

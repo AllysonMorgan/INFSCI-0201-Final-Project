@@ -184,7 +184,7 @@
                     <div class="event-card" 
                          data-event-type="{{ event.event_type }}" 
                          data-event-date="{{ event.date }}"
-                         data-event-time="{{ event.start_time }}"
+                         data-event-time="{{ event.time }}"
                          data-event-title="{{ event.title.lower() }}"
                          data-event-description="{{ event.description.lower() }}">
                         <div class="event-image" style="background-image: url('/static/default-event.jpg');"></div>
@@ -195,8 +195,7 @@
                                     {{ event.event_type|capitalize }}
                                 </span>
                             </div>
-                            <p><i class='bx bx-calendar'></i> {{ event.date }}</p>
-                            <p><i class='bx bx-time'></i> {{ event.start_time }}{% if event.end_time %} - {{ event.end_time }}{% endif %}</p>
+                            <p><i class='bx bx-calendar'></i> {{ event.date }} at {{ event.time }}</p>
                             <p><i class='bx bx-map'></i> {{ event.location }}</p>
                             <p class="event-description">{{ event.description[:100] }}{% if event.description|length > 100 %}...{% endif %}</p>
                             <div class="event-actions">
@@ -228,7 +227,6 @@
                         <div class="event-card" 
                              data-event-type="{{ event.event_type }}" 
                              data-event-date="{{ event.date }}"
-                             data-event-time="{{ event.start_time }}"
                              data-event-title="{{ event.title.lower() }}"
                              data-event-description="{{ event.description.lower() }}">
                             <div class="event-image" style="background-image: url('/static/default-event.jpg');"></div>
@@ -239,8 +237,7 @@
                                         {{ event.event_type|capitalize }}
                                     </span>
                                 </div>
-                                <p><i class='bx bx-calendar'></i> {{ event.date }}</p>
-                                <p><i class='bx bx-time'></i> {{ event.start_time }}{% if event.end_time %} - {{ event.end_time }}{% endif %}</p>
+                                <p><i class='bx bx-calendar'></i> {{ event.date }} at {{ event.time }}</p>
                                 <p><i class='bx bx-map'></i> {{ event.location }}</p>
                                 <div class="event-actions">
                                     <form method="POST" action="{{ url_for('unregister_from_event', event_id=event.id) }}" 
@@ -277,35 +274,34 @@
             const searchButton = document.getElementById('searchButton');
             const eventTypeFilter = document.getElementById('eventTypeFilter');
             const dateFilter = document.getElementById('dateFilter');
-            const timeFilter = document.getElementById('timeFilter');
             const resetButton = document.getElementById('resetFilters');
             const eventCards = document.querySelectorAll('.events-grid .event-card');
             const noEventsMessage = document.querySelector('.no-events-message');
 
             function filterEvents() {
+                const timeFilter = document.getElementById('timeFilter');
                 const searchTerm = searchInput.value.toLowerCase();
                 const selectedType = eventTypeFilter.value.toLowerCase();
                 const selectedDate = dateFilter.value;
-                const selectedTime = timeFilter.value;
                 let visibleCount = 0;
 
                 eventCards.forEach(card => {
+                    const selectedTime = timeFilter.value;
                     const eventType = card.dataset.eventType.toLowerCase();
                     const eventDate = card.dataset.eventDate;
-                    const eventTime = card.dataset.eventTime;
                     const eventTitle = card.dataset.eventTitle;
                     const eventDescription = card.dataset.eventDescription;
-                    
+                    const eventTime = card.dataset.eventTime;
                     const typeMatch = selectedType === '' || eventType === selectedType;
+                    
                     const dateMatch = selectedDate === '' || eventDate === selectedDate;
-                    const timeMatch = selectedTime === '' || 
-                                     (selectedTime === 'morning' && eventTime >= '08:00' && eventTime < '12:00') ||
-                                     (selectedTime === 'afternoon' && eventTime >= '12:00' && eventTime < '17:00') ||
-                                     (selectedTime === 'evening' && eventTime >= '17:00' && eventTime <= '21:00');
                     const searchMatch = searchTerm === '' || 
                                        eventTitle.includes(searchTerm) || 
                                        eventDescription.includes(searchTerm);
-                    
+                                       const timeMatch = selectedTime === '' || 
+                                      (selectedTime === 'morning' && eventTime >= '08:00' && eventTime < '12:00') ||
+                                      (selectedTime === 'afternoon' && eventTime >= '12:00' && eventTime < '17:00') ||
+                                      (selectedTime === 'evening' && eventTime >= '17:00' && eventTime <= '21:00');
                     if (typeMatch && dateMatch && timeMatch && searchMatch) {
                         card.style.display = 'block';
                         visibleCount++;
