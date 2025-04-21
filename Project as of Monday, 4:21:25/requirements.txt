@@ -1,7 +1,0 @@
-This program requires you to pip install the following:
-flask
-sqlalchemy
-werkzeug
-flask-migrate
-geopy
-pytz
