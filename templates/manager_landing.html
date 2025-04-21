@@ -23,8 +23,14 @@
             padding: 0;
             border: none;
         }
+        .attendees{
+            font-size:17px;
+            margin-left:5px;
+            margin-top:15px;
+            padding:10px;
+            padding-top:10px
+        }
         .attendee-badge {
-            position: absolute;
             top: 15px;
             left: 15px;
             background: rgba(0,0,0,0.7);
@@ -190,11 +196,11 @@
                              data-event-time="{{ event.time }}"
                              data-event-title="{{ event.title.lower() }}"
                              data-event-description="{{ event.description.lower() }}">
-                            <div class="event-image" style="background-image: url('/static/default-event.jpg');">
-                                <span class="attendees">
+                            
+                                <div class="attendees">
                                     <i class='bx bx-group'></i> {{ event.total_attendees }} attending
-                                </span>
-                            </div>
+                                </div>
+                            
                             <div class="event-details">
                                 <div class="event-header">
                                     <h1>{{ event.title }}</h1>
@@ -249,11 +255,11 @@
                              data-event-time="{{ event.time }}"
                              data-event-title="{{ event.title.lower() }}"
                              data-event-description="{{ event.description.lower() }}">
-                            <div class="event-image" style="background-image: url('/static/default-event.jpg');">
-                                <span class="attendees">
+                            
+                                <div class="attendees">
                                     <i class='bx bx-group'></i> {{ event.total_attendees }} attending
-                                </span>
-                            </div>
+                                </div>
+                            
                             <div class="event-details">
                                 <div class="event-header">
                                     <h1>{{ event.title }}</h1>
