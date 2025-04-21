@@ -139,7 +139,11 @@
             <div class="event-meta">
                 <div class="event-meta-item">
                     <i class='bx bx-calendar'></i>
-                    <span>{{ event.date }} at {{ event.time }}</span>
+                    <span>{{ event.date }}</span>
+                </div>
+                <div class="event-meta-item">
+                    <i class='bx bx-time'></i>
+                    <span>{{ event.start_time }}{% if event.end_time %} - {{ event.end_time }}{% endif %}</span>
                 </div>
                 <div class="event-meta-item">
                     <i class='bx bx-map'></i>

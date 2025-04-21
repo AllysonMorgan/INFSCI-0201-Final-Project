@@ -117,6 +117,7 @@
             <h1 class="registration-title">Register for {{ event.title }}</h1>
             
             <form method="POST" class="registration-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <div class="attendee-section">
                     <label for="num_attendees" class="attendee-label">
                         Number of attendees (including yourself):

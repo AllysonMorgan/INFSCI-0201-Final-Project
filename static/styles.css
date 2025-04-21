@@ -915,3 +915,22 @@ select:focus, select:active {
     color: var(--primary-color);
     display: none; 
 }
+
+/* Style for time selects */
+.time-select-container {
+    display: flex;
+    gap: 15px;
+}
+
+.time-select {
+    flex: 1;
+    padding: 10px 15px;
+    border: 2px solid #6c6d56;
+    border-radius: 30px;
+    background: white;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236c6d56'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 20px;
+}

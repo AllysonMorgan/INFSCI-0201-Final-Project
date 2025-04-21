@@ -1,15 +1,19 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import timedelta, datetime
+from datetime import timedelta, datetime, date
 import os
 from sqlalchemy import func, select, and_
 from flask_migrate import Migrate
 from geopy.geocoders import Nominatim
+from flask_wtf.csrf import CSRFProtect
+from flask_wtf.csrf import CSRFError
 
 # Initialize Flask app
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY') or os.urandom(24)
+app.config['SECRET_KEY'] = 'your-secret-key-here'  # Replace with a real secret key
+csrf = CSRFProtect(app)
 app.permanent_session_lifetime = timedelta(days=30)
 
 # Database configuration
@@ -53,8 +57,10 @@ class Event(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text, nullable=False)
-    date = db.Column(db.String(20), nullable=False)
-    time = db.Column(db.String(20), nullable=False)
+    date = db.Column(db.Date)
+    time = db.Column(db.Time)
+    start_time = db.Column(db.Time)
+    end_time = db.Column(db.Time)
     location = db.Column(db.String(120), nullable=False)
     event_type = db.Column(db.String(20), nullable=False, default='other')  # New field
     manager_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -76,18 +82,13 @@ class Event(db.Model):
         return total if total else 0
 
     def get_google_calendar_start_time(self):
-        event_datetime_str = f"{self.date} {self.time}"
-        event_datetime = datetime.strptime(event_datetime_str, '%Y-%m-%d %H:%M')
-        
-        return event_datetime.strftime('%Y%m%dT%H%M%SZ') 
+        return datetime.combine(self.date, self.start_time)
 
-    def get_google_calendar_end_time(self, duration_hours=2):
-        event_datetime_str = f"{self.date} {self.time}"
-        event_datetime = datetime.strptime(event_datetime_str, '%Y-%m-%d %H:%M')
-        
-        end_datetime = event_datetime + timedelta(hours=duration_hours)
-        
-        return end_datetime.strftime('%Y%m%dT%H%M%SZ')
+    def get_google_calendar_end_time(self):
+        return datetime.combine(self.date, self.end_time)
+    
+    def time(self):
+        return self.start_time
     
 # Initialize Database
 with app.app_context():
@@ -148,10 +149,18 @@ def manager_dashboard():
         other_events=other_events
     )
 
+@app.errorhandler(CSRFError)
+def handle_csrf_error(e):
+    flash('The form you submitted has expired. Please try again.', 'danger')
+    return redirect(request.referrer or url_for('home'))
 
 @app.route('/userlogin', methods=['GET', 'POST'])
 def userlogin():
     if request.method == 'POST':
+        if not validate_csrf():
+            flash('Invalid CSRF token', 'danger')
+            return redirect(url_for('userlogin'))
+        
         username = request.form['username']
         password = request.form['password']
         remember = request.form.get('remember')
@@ -328,24 +337,43 @@ def create_event():
 
     if request.method == 'POST':
         try:
+            # Add debug print to see if form data is received
+            print("Form data received:", request.form)
+            
             manager = User.query.filter_by(username=session['username']).first()
+            if not manager:
+                flash('Manager account not found', 'danger')
+                return redirect(url_for('create_event'))
+            
+            # Validate required fields
+            required_fields = ['title', 'description', 'date', 'start_time', 'location', 'event_type']
+            for field in required_fields:
+                if not request.form.get(field):
+                    flash(f'{field.replace("_", " ").title()} is required', 'danger')
+                    return redirect(url_for('create_event'))
             
             new_event = Event(
                 title=request.form['title'],
                 description=request.form['description'],
                 date=request.form['date'],
-                time=request.form['time'],
+                start_time=request.form['start_time'],
+                end_time=request.form.get('end_time'),  # Optional
                 location=request.form['location'],
-                event_type=request.form['event_type'], 
+                event_type=request.form['event_type'],
                 manager_id=manager.id
             )
+            
             db.session.add(new_event)
             db.session.commit()
+            
             flash('Event created successfully!', 'success')
             return redirect(url_for('manager_dashboard'))
+            
         except Exception as e:
             db.session.rollback()
+            print("Error creating event:", str(e))  
             flash(f'Error creating event: {str(e)}', 'danger')
+            return redirect(url_for('create_event'))
     
     return render_template('create_event.html')
 
@@ -364,17 +392,32 @@ def edit_event(event_id):
 
     if request.method == 'POST':
         try:
-            event.title = request.form['title']
-            event.description = request.form['description']
-            event.date = request.form['date']
-            event.time = request.form['time']
-            event.location = request.form['location']
+            event.title = request.form.get('title', event.title) 
+            event.description = request.form.get('description', event.description)
+            
+            if 'date' in request.form:
+                event.date = datetime.strptime(request.form['date'], '%Y-%m-%d').date()
+            
+            if 'start_time' in request.form and request.form['start_time']:
+                event.start_time = datetime.strptime(request.form['start_time'], '%H:%M').time()
+            
+            if 'end_time' in request.form and request.form['end_time']:
+                event.end_time = datetime.strptime(request.form['end_time'], '%H:%M').time()
+            else:
+                event.end_time = None
+            
+            event.location = request.form.get('location', event.location)
+            
             db.session.commit()
             flash('Event updated successfully!', 'success')
             return redirect(url_for('manager_dashboard'))
+        except ValueError as e:
+            db.session.rollback()
+            flash(f'Invalid date/time format: {str(e)}', 'danger')
         except Exception as e:
             db.session.rollback()
             flash(f'Error updating event: {str(e)}', 'danger')
+            app.logger.error(f"Error updating event {event_id}: {str(e)}")
     
     return render_template('edit_event.html', event=event)
 

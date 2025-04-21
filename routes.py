@@ -11,5 +11,3 @@ def manager_dashboard():
     manager = User.query.filter_by(username=session['username']).first()
     events = Event.query.filter_by(manager_id=manager.id).all()
     return render_template('manager_landing.html', manager_events=events)
-
-# Add all other routes here

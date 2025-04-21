@@ -83,18 +83,15 @@
             background-size: 20px;
         }
         
-        .date-time-row {
+        .time-select-container {
             display: flex;
             gap: 20px;
         }
         
-        .date-time-group {
+        .time-select-group {
             flex: 1;
         }
-        .date-time-group input{
-            border: 2px solid #6c6d56;
-            border-radius:30px
-        }
+        
         .form-actions {
             display: flex;
             justify-content: center;
@@ -137,7 +134,7 @@
         }
         
         @media (max-width: 768px) {
-            .date-time-row {
+            .time-select-container {
                 flex-direction: column;
                 gap: 15px;
             }
@@ -161,6 +158,7 @@
             <h1 class="create-event-title">Create New Event</h1>
             
             <form method="POST" action="{{ url_for('create_event') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <!-- Event Title -->
                 <div class="form-section">
                     <span class="section-title">Event Title</span>
@@ -188,12 +186,33 @@
                 <!-- Date & Time -->
                 <div class="form-section">
                     <span class="section-title">When</span>
-                    <div class="date-time-row">
-                        <div class="date-time-group">
+                    <div class="time-select-container">
+                        <div class="time-select-group">
                             <input type="date" name="date" class="oval-input" required>
                         </div>
-                        <div class="date-time-group">
-                            <input type="time" name="time" class="oval-input" required>
+                        <div class="time-select-group">
+                            <select name="start_time" class="oval-select" required>
+                                <option value="" disabled selected>Start Time</option>
+                                {% for hour in range(8, 21) %}
+                                    {% for minute in ['00', '30'] %}
+                                        <option value="{{ '%02d' % hour }}:{{ minute }}">
+                                            {{ '%02d' % hour }}:{{ minute }}
+                                        </option>
+                                    {% endfor %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="time-select-group">
+                            <select name="end_time" class="oval-select">
+                                <option value="" selected>End Time (Optional)</option>
+                                {% for hour in range(8, 22) %}
+                                    {% for minute in ['00', '30'] %}
+                                        <option value="{{ '%02d' % hour }}:{{ minute }}">
+                                            {{ '%02d' % hour }}:{{ minute }}
+                                        </option>
+                                    {% endfor %}
+                                {% endfor %}
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -214,3 +233,10 @@
     </div>
 </body>
 </html>
+<script>
+    document.querySelector('form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        console.log("Form data:", Object.fromEntries(new FormData(this)));
+        this.submit(); // Remove this line after testing
+    });
+    </script>
